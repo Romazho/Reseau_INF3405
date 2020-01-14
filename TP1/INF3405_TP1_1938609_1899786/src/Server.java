@@ -4,14 +4,58 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Server {
 	private static ServerSocket listener;
 	
+	//partie qui vérifie la validité de l'adresse IP en utilisant la librairie Regex 
+	private static final String IPv4_REGEX =
+			"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+
+	private static final Pattern IPv4_PATTERN = Pattern.compile(IPv4_REGEX);
+
+	public static boolean isValidInet4Address(String ip) {
+		if (ip == null) {
+			return false;
+		}
+
+		Matcher matcher = IPv4_PATTERN.matcher(ip);
+
+		return matcher.matches();
+	}
+	
 	public static void main(String[] args) throws Exception {
 		int clientCounter = 0;
+				
+		System.out.println("Séléctionner votre adresse IP:");
+		
 		String serverAddress = "127.0.0.1";
+		Scanner S = new Scanner(System.in);
+		serverAddress = S.next();
+		
+		while (!isValidInet4Address(serverAddress)) {
+			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
+			serverAddress = S.next();
+		}
+
 		int port = 5000;	
+		System.out.println("Séléctionner votre port:");
+		port = S.nextInt();
+
+		//vérification de la cohérence du port
+		while(port < 5000 || port > 5050) {
+			System.out.println("Veuillez entrer un port entre 5000 et 5050:");
+			port = S.nextInt();
+		}
+
+		S.close();
 		
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
