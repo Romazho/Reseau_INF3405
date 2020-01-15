@@ -1,9 +1,14 @@
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import java.util.regex.Matcher;
@@ -11,6 +16,7 @@ import java.util.regex.Pattern;
 
 public class Server {
 	private static ServerSocket listener;
+	private static Map<String, String> nameAndPasswordMap;
 	
 	//partie qui vérifie la validité de l'adresse IP en utilisant la librairie Regex 
 	private static final String IPv4_REGEX =
@@ -33,6 +39,9 @@ public class Server {
 	
 	public static void main(String[] args) throws Exception {
 		int clientCounter = 0;
+		nameAndPasswordMap = new HashMap<String, String>();
+		
+		readUsers();
 				
 		System.out.println("Séléctionner votre adresse IP:");
 		
@@ -72,6 +81,33 @@ public class Server {
 		}
 	}
 	
+	private static void readUsers() {
+		try {
+			File fileDesc = new File("./src/users.txt");
+			Scanner reader = new Scanner(fileDesc);
+			
+			while(reader.hasNextLine()) {
+				String line = reader.nextLine();
+				
+				String[] nameAndPassword = line.split(" ");
+				
+				nameAndPasswordMap.put(nameAndPassword[0], nameAndPassword[1]);
+			}
+			
+			reader.close();
+			
+		} catch(FileNotFoundException error) {
+			System.out.println(error);
+			error.printStackTrace();
+		}
+		
+		// REMOVE WHEN DONE
+		for(Map.Entry<String,String> entry : nameAndPasswordMap.entrySet()) {
+			System.out.println(entry.getKey());
+			System.out.println(entry.getValue());
+		}
+	}
+	
 	private static class ClientHandler extends Thread {
 		private Socket sock;
 		private int clientNumber;
@@ -86,6 +122,13 @@ public class Server {
 			try {
 				DataOutputStream out = new DataOutputStream(sock.getOutputStream());
 				out.writeUTF("Hello from server - you are client# " + clientNumber);
+				
+				DataInputStream in = new DataInputStream(sock.getInputStream());
+				String name = in.readUTF();
+				String password = in.readUTF();
+				//System.out.println(name);
+				validateUser(name, password);
+				
 			} catch (IOException e) {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);
 			} finally {
@@ -95,6 +138,19 @@ public class Server {
 					System.out.println("Can't close a socket, wtf?");
 				}
 				System.out.println("Connection with client# " + clientNumber + " closed.");
+			}
+		}
+		
+		public void validateUser(String name, String password) {
+			System.out.println(password + " " + nameAndPasswordMap.get(name));
+			if((nameAndPasswordMap.get(name) != null) && (nameAndPasswordMap.get(name).equals(password))) {
+				//on vérifie le password
+				System.out.println("Correct credentials for " + name);
+			}
+			else {
+				//on ajoute le user
+				System.out.println("user doesn't exit");
+
 			}
 		}
 	}

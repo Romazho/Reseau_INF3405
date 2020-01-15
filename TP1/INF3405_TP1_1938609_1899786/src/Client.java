@@ -1,4 +1,5 @@
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -8,6 +9,7 @@ public class Client {
 	private static Socket sock;
 	
 	//partie qui vérifie la validité de l'adresse IP en utilisant la librairie Regex 
+	//MENTIONER LA SOURCE
 	private static final String IPv4_REGEX =
 			"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
 			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
@@ -50,13 +52,17 @@ public class Client {
 			port = S.nextInt();
 		}
 		
+		sock = new Socket(serverAddress, port);
+		
+		DataOutputStream out = new DataOutputStream(sock.getOutputStream());
+		
 		System.out.println("Veuillez entrer votre nom d'utilisateur:");
 		String nomUtilisateur = S.next();
+		out.writeUTF(nomUtilisateur);
 		
 		System.out.println("Veuillez entrer votre mot de passe:");
 		String motPasse = S.next();
-		
-		sock = new Socket(serverAddress, port);
+		out.writeUTF(motPasse);
 		
 		System.out.format("Server running on %s:%d%n", serverAddress, port);
 		
