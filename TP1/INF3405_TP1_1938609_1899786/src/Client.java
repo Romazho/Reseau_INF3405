@@ -15,9 +15,7 @@ public class Client {
 	private static DataInputStream in;
 	private static DataOutputStream out;
 
-	// partie qui vérifie la validité de l'adresse IP en utilisant la librairie
-	// Regex
-	// MENTIONER LA SOURCE
+	//source: https://www.techiedelight.com/validate-ip-address-java/
 	private static final String IPv4_REGEX = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
 			+ "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
 			+ "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";

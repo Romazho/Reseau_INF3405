@@ -20,7 +20,7 @@ public class Server {
 	private static ServerSocket listener;
 	private static Map<String, String> nameAndPasswordMap;
 	
-	//partie qui vérifie la validité de l'adresse IP en utilisant la librairie Regex 
+	//source: https://www.techiedelight.com/validate-ip-address-java/
 	private static final String IPv4_REGEX =
 			"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
 			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
