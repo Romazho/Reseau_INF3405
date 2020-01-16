@@ -1,11 +1,16 @@
+import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 public class Client {
 	private static Socket sock;
@@ -26,6 +31,8 @@ public class Client {
 		inputSc = new Scanner(System.in);
 
 		createSocket();
+		
+		sendImage();
 
 		askUserCredentials();
 
@@ -116,5 +123,35 @@ public class Client {
 				System.out.println(serverResponse);
 			}
 		}
+	}
+	
+	private static void sendImage() {
+		//  BufferedImage image = ImageIO.read(new File("./src/potato.png"));
+		
+		//https://www.daniweb.com/programming/software-development/threads/370592/send-image-to-client-over-a-socket
+		File testF = new File( "./src/potato.png" );
+	
+		try {
+			System.out.println( "Writing..." );
+			//BufferedInputStream in = new BufferedInputStream( new FileInputStream( testF ) );
+			//BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( result ) );
+			
+			byte[] buffer = new byte[ 4096 ];
+            int bytesRead;
+            while ( (bytesRead = in.read( buffer )) != -1 ) {
+        		out.write( buffer, 0, bytesRead );
+            }
+            
+        	out.flush();
+        	out.close();
+			
+        	System.out.println( "Done." );
+        	
+		} catch ( FileNotFoundException e ) {
+			e.printStackTrace();
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+
 	}
 }
