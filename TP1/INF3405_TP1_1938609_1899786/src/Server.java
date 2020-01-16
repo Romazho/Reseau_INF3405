@@ -136,6 +136,8 @@ public class Server {
 				if(!isExistantUser) {
 					registerUsername(name);
 					out.writeUTF("usernull");
+				} else {
+					out.writeUTF("ok");
 				}
 				String password = in.readUTF();
 				if(!isExistantUser) {

@@ -32,7 +32,7 @@ public class Client {
 
 		createSocket();
 		
-		sendImage();
+		//sendImage();
 
 		askUserCredentials();
 
