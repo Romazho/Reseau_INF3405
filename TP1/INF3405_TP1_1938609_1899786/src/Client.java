@@ -1,22 +1,41 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Client {
 	private static Socket sock;
-	
-	//partie qui vérifie la validité de l'adresse IP en utilisant la librairie Regex 
-	//MENTIONER LA SOURCE
-	private static final String IPv4_REGEX =
-			"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+	private static Scanner inputSc;
+	private static int port;
+	private static String serverAddress;
+	private static DataInputStream in;
+	private static DataOutputStream out;
+
+	// partie qui vérifie la validité de l'adresse IP en utilisant la librairie
+	// Regex
+	// MENTIONER LA SOURCE
+	private static final String IPv4_REGEX = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
+			+ "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
+			+ "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
 
 	private static final Pattern IPv4_PATTERN = Pattern.compile(IPv4_REGEX);
+
+	public static void main(String[] args) throws Exception {
+		inputSc = new Scanner(System.in);
+
+		createSocket();
+
+		askUserCredentials();
+		
+		processUserRequests();
+
+		sock.close();
+		inputSc.close();
+	}
 
 	public static boolean isValidInet4Address(String ip) {
 		if (ip == null) {
@@ -27,51 +46,60 @@ public class Client {
 
 		return matcher.matches();
 	}
-	
-	public static void main(String[] args) throws Exception {
-	
-		//demander à l'utilisateur ces 4 attributs
-		System.out.println("Séléctionner votre adresse IP:");
 
-		String serverAddress = "127.0.0.1";
-		Scanner S = new Scanner(System.in);
-		serverAddress = S.next();
-		
+	private static void createSocket() throws UnknownHostException, IOException {
+		System.out.println("Séléctionnez votre adresse IP:");
+		serverAddress = inputSc.nextLine();
+
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
-			serverAddress = S.next();
+			serverAddress = inputSc.nextLine();
 		}
 
-		int port = 5000;	
-		System.out.println("Séléctionner votre port:");
-		port = S.nextInt();
+		port = 5000;
+		System.out.println("Sélectionnez votre port:");
+		port = inputSc.nextInt();
 
-		//vérification de la cohérence du port
-		while(port < 5000 || port > 5050) {
+		// vérification de la cohérence du port
+		while (port < 5000 || port > 5050) {
 			System.out.println("Veuillez entrer un port entre 5000 et 5050:");
-			port = S.nextInt();
+			port = inputSc.nextInt();
 		}
-		
+
+		inputSc.nextLine();
+
 		sock = new Socket(serverAddress, port);
-		
-		DataOutputStream out = new DataOutputStream(sock.getOutputStream());
-		
+		in = new DataInputStream(sock.getInputStream());
+		out = new DataOutputStream(sock.getOutputStream());
+	}
+
+	private static void askUserCredentials() throws IOException {
 		System.out.println("Veuillez entrer votre nom d'utilisateur:");
-		String nomUtilisateur = S.next();
-		out.writeUTF(nomUtilisateur);
-		
+		String username = inputSc.nextLine();
+		out.writeUTF(username);
+
 		System.out.println("Veuillez entrer votre mot de passe:");
-		String motPasse = S.next();
-		out.writeUTF(motPasse);
+		String password = inputSc.nextLine();
+		out.writeUTF(password);
+	}
+
+	private static void processUserRequests() throws IOException {
+		String userRequest = "";
 		
-		System.out.format("Server running on %s:%d%n", serverAddress, port);
+		String serverResponse = in.readUTF();
 		
-		DataInputStream in = new DataInputStream(sock.getInputStream());
+		System.out.println(serverResponse);
 		
-		String msg = in.readUTF();
-		
-		System.out.println(msg);
-		
-		sock.close();
+		while (!userRequest.equals("exit")) {
+			System.out.println("Que souhaitez-vous faire? Sortir (exit) ou 'sobelizer' une image (sobel)");
+
+			userRequest = inputSc.nextLine();
+			
+			out.writeUTF(userRequest);
+			
+			serverResponse = in.readUTF();
+			
+			System.out.println(serverResponse);
+		}
 	}
 }

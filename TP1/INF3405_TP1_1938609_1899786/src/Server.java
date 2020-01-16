@@ -26,16 +26,6 @@ public class Server {
 			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
 
 	private static final Pattern IPv4_PATTERN = Pattern.compile(IPv4_REGEX);
-
-	public static boolean isValidInet4Address(String ip) {
-		if (ip == null) {
-			return false;
-		}
-
-		Matcher matcher = IPv4_PATTERN.matcher(ip);
-
-		return matcher.matches();
-	}
 	
 	public static void main(String[] args) throws Exception {
 		int clientCounter = 0;
@@ -81,6 +71,16 @@ public class Server {
 		}
 	}
 	
+	public static boolean isValidInet4Address(String ip) {
+		if (ip == null) {
+			return false;
+		}
+
+		Matcher matcher = IPv4_PATTERN.matcher(ip);
+
+		return matcher.matches();
+	}
+	
 	private static void readUsers() {
 		try {
 			File fileDesc = new File("./src/users.txt");
@@ -102,54 +102,64 @@ public class Server {
 		}
 		
 		// REMOVE WHEN DONE
-		for(Map.Entry<String,String> entry : nameAndPasswordMap.entrySet()) {
-			System.out.println(entry.getKey());
-			System.out.println(entry.getValue());
-		}
+//		for(Map.Entry<String,String> entry : nameAndPasswordMap.entrySet()) {
+//			System.out.println(entry.getKey());
+//			System.out.println(entry.getValue());
+//		}
 	}
 	
 	private static class ClientHandler extends Thread {
 		private Socket sock;
 		private int clientNumber;
+		private DataOutputStream out;
+		private DataInputStream in;
 		
 		public ClientHandler(Socket socket, int clientNumber) {
 			this.sock = socket;
 			this.clientNumber = clientNumber;
+			try {
+				out = new DataOutputStream(sock.getOutputStream());
+				in = new DataInputStream(sock.getInputStream());
+			}catch(IOException e) {
+				System.out.println(e);
+			}
 			System.out.println("New connection with client# " + clientNumber + " at " + socket);
 		}
 		
 		public void run() {
 			try {
-				DataOutputStream out = new DataOutputStream(sock.getOutputStream());
-				out.writeUTF("Hello from server - you are client# " + clientNumber);
-				
-				DataInputStream in = new DataInputStream(sock.getInputStream());
 				String name = in.readUTF();
 				String password = in.readUTF();
-				//System.out.println(name);
 				validateUser(name, password);
+				out.writeUTF("Hello from server - you are client# " + clientNumber);
 				
 			} catch (IOException e) {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);
 			} finally {
 				try {
+					String userRequest = "";
+					
+					while(!userRequest.equals("exit")) {
+						userRequest = in.readUTF();
+						out.writeUTF(userRequest.toUpperCase());
+					}
 					sock.close();
 				} catch (IOException e) {
-					System.out.println("Can't close a socket, wtf?");
+					System.out.println(e);
 				}
 				System.out.println("Connection with client# " + clientNumber + " closed.");
 			}
 		}
 		
 		public void validateUser(String name, String password) {
-			System.out.println(password + " " + nameAndPasswordMap.get(name));
+			//System.out.println(password + " " + nameAndPasswordMap.get(name));
 			if((nameAndPasswordMap.get(name) != null) && (nameAndPasswordMap.get(name).equals(password))) {
 				//on vérifie le password
 				System.out.println("Correct credentials for " + name);
 			}
 			else {
 				//on ajoute le user
-				System.out.println("user doesn't exit");
+				System.out.println("user doesn't exist");
 
 			}
 		}
