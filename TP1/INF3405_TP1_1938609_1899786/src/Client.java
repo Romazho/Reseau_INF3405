@@ -30,7 +30,7 @@ public class Client {
 		createSocket();
 
 		askUserCredentials();
-		
+
 		processUserRequests();
 
 		sock.close();
@@ -74,32 +74,49 @@ public class Client {
 	}
 
 	private static void askUserCredentials() throws IOException {
+		String serverResponse = "";
+		
 		System.out.println("Veuillez entrer votre nom d'utilisateur:");
 		String username = inputSc.nextLine();
 		out.writeUTF(username);
+		
+		serverResponse = in.readUTF();
+		
+		if (serverResponse.equals("usernull")) {
+			System.out
+					.println(username + " n'existe pas dans la base de donnees. Creation de l'utilisateur " + username);
+		}
 
 		System.out.println("Veuillez entrer votre mot de passe:");
 		String password = inputSc.nextLine();
 		out.writeUTF(password);
+		
+		serverResponse = in.readUTF();
+		
+		if(serverResponse.equals("newuser")) {
+			System.out.println("Mot de passe ajoute");
+		}
 	}
 
 	private static void processUserRequests() throws IOException {
 		String userRequest = "";
-		
-		String serverResponse = in.readUTF();
-		
-		System.out.println(serverResponse);
-		
-		while (!userRequest.equals("exit")) {
-			System.out.println("Que souhaitez-vous faire? Sortir (exit) ou 'sobelizer' une image (sobel)");
 
-			userRequest = inputSc.nextLine();
-			
-			out.writeUTF(userRequest);
-			
-			serverResponse = in.readUTF();
-			
+		String serverResponse = in.readUTF();
+
+		if (!serverResponse.equals("wrongpassword")) {
 			System.out.println(serverResponse);
+
+			while (!userRequest.equals("exit")) {
+				System.out.println("Que souhaitez-vous faire? Sortir (exit) ou 'sobelizer' une image (sobel)");
+
+				userRequest = inputSc.nextLine();
+
+				out.writeUTF(userRequest);
+
+				serverResponse = in.readUTF();
+
+				System.out.println(serverResponse);
+			}
 		}
 	}
 }

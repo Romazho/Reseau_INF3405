@@ -2,7 +2,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -127,18 +129,30 @@ public class Server {
 		}
 		
 		public void run() {
+			String userRequest = "";
 			try {
 				String name = in.readUTF();
+				boolean isExistantUser = isUsernameRegistered(name);
+				if(!isExistantUser) {
+					registerUsername(name);
+					out.writeUTF("usernull");
+				}
 				String password = in.readUTF();
-				validateUser(name, password);
-				out.writeUTF("Hello from server - you are client# " + clientNumber);
+				if(!isExistantUser) {
+					registerPassword(password);
+					out.writeUTF("newuser");
+					out.writeUTF("Hello from server - you are client# " + clientNumber);
+				} else if(validateUser(name, password)) {
+					out.writeUTF("Hello from server - you are client# " + clientNumber);	
+				} else {
+					out.writeUTF("wrongpassword");
+					userRequest = "exit";
+				}
 				
 			} catch (IOException e) {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);
 			} finally {
 				try {
-					String userRequest = "";
-					
 					while(!userRequest.equals("exit")) {
 						userRequest = in.readUTF();
 						out.writeUTF(userRequest.toUpperCase());
@@ -151,16 +165,41 @@ public class Server {
 			}
 		}
 		
-		public void validateUser(String name, String password) {
+		private boolean isUsernameRegistered(String username) {
+			return nameAndPasswordMap.get(username) != null;
+		}
+		
+		private void registerUsername(String username) throws IOException {
+			FileWriter writer = new FileWriter("./src/users.txt", true);
+			PrintWriter printer = new PrintWriter(writer);
+			
+			printer.println();
+			printer.printf("%s", username);
+			
+			printer.close();
+			writer.close();
+		}
+		
+		private void registerPassword(String password) throws IOException {
+			FileWriter writer = new FileWriter("./src/users.txt", true);
+			PrintWriter printer = new PrintWriter(writer);
+			
+			printer.printf("%s", " " + password);
+			
+			printer.close();
+			writer.close();
+		}
+		
+		public boolean validateUser(String name, String password) throws IOException {
 			//System.out.println(password + " " + nameAndPasswordMap.get(name));
 			if((nameAndPasswordMap.get(name) != null) && (nameAndPasswordMap.get(name).equals(password))) {
 				//on vérifie le password
-				System.out.println("Correct credentials for " + name);
+				System.out.println("Utilisateur " + name + " connecte");
+				return true;
 			}
 			else {
-				//on ajoute le user
-				System.out.println("user doesn't exist");
-
+				System.out.println("Mot de passe incorrect pour " + name);
+				return false;
 			}
 		}
 	}
