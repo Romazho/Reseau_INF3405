@@ -32,7 +32,7 @@ public class Client {
 
 		createSocket();
 		
-		sendImage();
+		//sendImage();
 
 		askUserCredentials();
 
@@ -120,6 +120,12 @@ public class Client {
 
 				serverResponse = in.readUTF();
 
+				if(serverResponse.equals("sobel")) {
+					sendImage();
+					//attendre que le serveur nous l'image sobeliser
+					//recvoire l'image et la sauvgarder localement.
+				}
+				
 				System.out.println(serverResponse);
 			}
 		}

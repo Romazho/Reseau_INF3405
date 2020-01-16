@@ -155,6 +155,10 @@ public class Server {
 				try {
 					while(!userRequest.equals("exit")) {
 						userRequest = in.readUTF();
+						if(userRequest.equals("sobel")) {
+							out.writeUTF("sobel");
+							//recevoir l'image envoyé du client
+						}
 						out.writeUTF(userRequest.toUpperCase());
 					}
 					sock.close();
