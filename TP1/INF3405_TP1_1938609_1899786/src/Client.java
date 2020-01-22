@@ -151,7 +151,6 @@ public class Client {
 			System.out.println("Quel est le nom de l'image que vous souhaitez 'Sobeliser'? (spécifier le format de l'image)");
 			String imageName = inputSc.nextLine();
 			out.writeUTF(imageName);
-			//File startImage = ;
 			
 			System.out.println("Donnez le nom de l'image 'sobeliser' (spécifier le format de l'image)");
 			String resultName = inputSc.nextLine();

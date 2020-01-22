@@ -186,14 +186,16 @@ public class Server {
 							Sobel sobel = new Sobel();
 							image = sobel.process(image);
 
+							//envoyer l'image
+
+							
 					        System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
-					        ImageIO.write(image, "png", new File("./src/" + resultName));
+					        ImageIO.write(image, "jpg", new File("./src/" + resultName));
 							///////////////////////////////////////////////////////////////
 							
 							System.out.println("l'image a été récu");
 						
 														
-							//envoyer l'image
 
 						}
 						out.writeUTF(userRequest.toUpperCase());
