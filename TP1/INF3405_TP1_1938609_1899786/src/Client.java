@@ -1,9 +1,14 @@
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -96,7 +101,9 @@ public class Client {
 		String password = inputSc.nextLine();
 		out.writeUTF(password);
 		
-		serverResponse = in.readUTF();
+		//serverResponse = in.readUTF();
+		
+		System.out.println(serverResponse);
 		
 		if(serverResponse.equals("newuser")) {
 			System.out.println("Mot de passe ajoute");
@@ -106,6 +113,8 @@ public class Client {
 	private static void processUserRequests() throws IOException {
 		String userRequest = "";
 
+		System.out.println("in processUserRequests");
+		
 		String serverResponse = in.readUTF();
 
 		if (!serverResponse.equals("wrongpassword")) {
@@ -122,7 +131,7 @@ public class Client {
 
 				if(serverResponse.equals("sobel")) {
 					sendImage();
-					//attendre que le serveur nous l'image sobeliser
+					//attendre que le serveur nous envoie l'image sobeliser
 					//recvoire l'image et la sauvgarder localement.
 				}
 				
@@ -136,23 +145,35 @@ public class Client {
 		
 		//https://www.daniweb.com/programming/software-development/threads/370592/send-image-to-client-over-a-socket
 		File testF = new File( "./src/potato.png" );
-	
+		File result = new File( "./src/SobledPotato.jpg" );
+
 		try {
-			System.out.println( "Writing..." );
-			//BufferedInputStream in = new BufferedInputStream( new FileInputStream( testF ) );
-			//BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( result ) );
+			System.out.println("Quel est le nom de l'image que vous souhaitez 'Sobeliser'?");
+			String imageName = inputSc.nextLine();
+			out.writeUTF(imageName);
+			
+			//
+			
+			System.out.println("Image is being sent");
+			BufferedInputStream in = new BufferedInputStream( new FileInputStream( testF ) );
+			BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( result ) );
 			
 			byte[] buffer = new byte[ 4096 ];
-            int bytesRead;
-            while ( (bytesRead = in.read( buffer )) != -1 ) {
-        		out.write( buffer, 0, bytesRead );
-            }
-            
-        	out.flush();
-        	out.close();
-			
-        	System.out.println( "Done." );
-        	
+	        int bytesRead;
+	        //int a =0;
+	        while ( (bytesRead = in.read( buffer )) != -1 ) {
+	    		out.write( buffer, 0, bytesRead );
+				//System.out.println(a++);
+
+	        }
+	        
+			System.out.println("image envoyé au serveur");
+	        
+	    	out.flush();
+	    	out.close();
+			in.close();
+	    	//System.out.println( "Done." );
+	    	
 		} catch ( FileNotFoundException e ) {
 			e.printStackTrace();
 		} catch ( IOException e ) {
@@ -160,4 +181,40 @@ public class Client {
 		}
 
 	}
+	
+
+	
+	
+	/*try {
+    
+ 	//sock = new Socket("localhost", 8006);
+	System.out.println("Image is being sent");
+
+  
+ 	ObjectOutputStream  oos = new ObjectOutputStream(sock.getOutputStream());
+ 	//  ois = new ObjectInputStream(socket.getInputStream());
+    
+  	oos.flush();
+   	oos.writeObject(new String("./src/potato.png"));
+    
+    oos.flush();
+    oos.reset();
+    //int sz=(Integer )ois.readObject();
+    //System.out.println ("Receving "+(sz/1024)+" Bytes From Sever");
+     
+    byte b[]=new byte [sz];
+    int bytesRead = ois.read(b, 0, b.length);
+      for (int i = 0; i<sz; i++)
+        {
+            System.out.print(b[i]);
+        }
+        FileOutputStream fos=new FileOutputStream(new File("demo.jpg"));
+        fos.write(b,0,b.length);
+    System.out.println ("From Server : "+ois.readObject());
+    oos.close();
+    ois.close();
+  } catch(Exception e) {
+    System.out.println(e.getMessage());
+    e.printStackTrace();
+  }*/
 }

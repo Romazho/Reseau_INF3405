@@ -1,6 +1,8 @@
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -160,6 +162,23 @@ public class Server {
 						if(userRequest.equals("sobel")) {
 							out.writeUTF("sobel");
 							//recevoir l'image envoyé du client
+							String imageName = in.readUTF();
+							//System.out.println("this image is in: " + "./src/" + imageName);
+							
+							BufferedInputStream reader = new BufferedInputStream( new FileInputStream( "./src/" + imageName ) );
+							byte[] buffer = new byte[ 4096 ];
+							int bytesRead;
+							//int a = 0;
+							while ( (bytesRead = reader.read(buffer)) != -1 ) {
+								out.write( buffer, 0, bytesRead );
+								//System.out.println(a++);
+							}
+							reader.close();
+							System.out.println("l'image a été récu");
+							//sobeliser
+							
+							//envoyer l'image
+
 						}
 						out.writeUTF(userRequest.toUpperCase());
 					}
