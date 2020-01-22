@@ -1,4 +1,6 @@
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -11,12 +13,15 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 public class Server {
 	private static ServerSocket listener;
@@ -163,25 +168,31 @@ public class Server {
 							out.writeUTF("sobel");
 							//recevoir l'image envoyé du client
 							String imageName = in.readUTF();
+							String resultName = in.readUTF();
 							
-							BufferedInputStream reader = new BufferedInputStream( new FileInputStream( "./src/" + imageName ) );
-							byte[] buffer = new byte[ 4096 ];
-							int bytesRead;
-							//int a = 0;
-							
-							while ( (bytesRead = reader.read(buffer)) != -1 ) {
-								out.write( buffer, 0, bytesRead );
-								//System.out.println(a++);
-							}
-							
+							///////////////////////////////////////////////////////////////
+					        System.out.println("Reading: " + System.currentTimeMillis());
+
+					        byte[] sizeAr = new byte[4];
+					        in.read(sizeAr);
+					        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+					        byte[] imageAr = new byte[size];
+					        in.read(imageAr);
+
+					        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+					        
+					    	//sobeliser
+							Sobel sobel = new Sobel();
+							image = sobel.process(image);
+
+					        System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
+					        ImageIO.write(image, "png", new File("./src/" + resultName));
+							///////////////////////////////////////////////////////////////
 							
 							System.out.println("l'image a été récu");
-							//sobeliser
-							//Sobel sobel = new Sobel();
-							//sobel.process(reader)
-							
-							reader.close();
-							
+						
+														
 							//envoyer l'image
 
 						}

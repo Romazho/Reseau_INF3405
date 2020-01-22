@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,31 +151,30 @@ public class Client {
 			System.out.println("Quel est le nom de l'image que vous souhaitez 'Sobeliser'? (spécifier le format de l'image)");
 			String imageName = inputSc.nextLine();
 			out.writeUTF(imageName);
-			File startImage = new File( "./src/" + imageName );
+			//File startImage = ;
 			
 			System.out.println("Donnez le nom de l'image 'sobeliser' (spécifier le format de l'image)");
 			String resultName = inputSc.nextLine();
-			//out.writeUTF(resultName);
-			File resultImage = new File( "./src/" + resultName );
+			out.writeUTF(resultName);
+			//File finalImageName = new File( "./src/" + resultName );
 			
-			//doit être du type BufferedImage!!!
-			BufferedInputStream in = new BufferedInputStream( new FileInputStream( startImage ) );
-			BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( resultImage ) );
+			BufferedImage image = ImageIO.read(new File( "./src/" + imageName ));
 			
-			byte[] buffer = new byte[ 4096 ];
-	        int bytesRead;
-	        //int a =0;
-	        while ( (bytesRead = in.read( buffer )) != -1 ) {
-	    		out.write( buffer, 0, bytesRead );
-				//System.out.println(a++);
+			//BufferedImage resultImage = ImageIO.read(finalImageName);
+			
+		    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	        ImageIO.write(image, "jpg", byteArrayOutputStream);
 
-	        }
+	        byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+	        out.write(size);
+	        out.write(byteArrayOutputStream.toByteArray());
+	        out.flush();
+	        System.out.println("Flushed: " + System.currentTimeMillis());	
 	        
 			System.out.println("image envoyé au serveur");
 	        
-	    	out.flush();
-	    	out.close();
-			in.close();
+	    	//out.close();
+			//in.close();
 	    	
 		} catch ( FileNotFoundException e ) {
 			e.printStackTrace();
