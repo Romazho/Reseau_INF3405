@@ -144,19 +144,21 @@ public class Client {
 		//  BufferedImage image = ImageIO.read(new File("./src/potato.png"));
 		
 		//https://www.daniweb.com/programming/software-development/threads/370592/send-image-to-client-over-a-socket
-		File testF = new File( "./src/potato.png" );
-		File result = new File( "./src/SobledPotato.jpg" );
 
 		try {
-			System.out.println("Quel est le nom de l'image que vous souhaitez 'Sobeliser'?");
+			System.out.println("Quel est le nom de l'image que vous souhaitez 'Sobeliser'? (spécifier le format de l'image)");
 			String imageName = inputSc.nextLine();
 			out.writeUTF(imageName);
+			File startImage = new File( "./src/" + imageName );
 			
-			//
+			System.out.println("Donnez le nom de l'image 'sobeliser' (spécifier le format de l'image)");
+			String resultName = inputSc.nextLine();
+			//out.writeUTF(resultName);
+			File resultImage = new File( "./src/" + resultName );
 			
-			System.out.println("Image is being sent");
-			BufferedInputStream in = new BufferedInputStream( new FileInputStream( testF ) );
-			BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( result ) );
+			//doit être du type BufferedImage!!!
+			BufferedInputStream in = new BufferedInputStream( new FileInputStream( startImage ) );
+			BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( resultImage ) );
 			
 			byte[] buffer = new byte[ 4096 ];
 	        int bytesRead;
@@ -172,7 +174,6 @@ public class Client {
 	    	out.flush();
 	    	out.close();
 			in.close();
-	    	//System.out.println( "Done." );
 	    	
 		} catch ( FileNotFoundException e ) {
 			e.printStackTrace();

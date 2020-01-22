@@ -163,19 +163,24 @@ public class Server {
 							out.writeUTF("sobel");
 							//recevoir l'image envoyé du client
 							String imageName = in.readUTF();
-							//System.out.println("this image is in: " + "./src/" + imageName);
 							
 							BufferedInputStream reader = new BufferedInputStream( new FileInputStream( "./src/" + imageName ) );
 							byte[] buffer = new byte[ 4096 ];
 							int bytesRead;
 							//int a = 0;
+							
 							while ( (bytesRead = reader.read(buffer)) != -1 ) {
 								out.write( buffer, 0, bytesRead );
 								//System.out.println(a++);
 							}
-							reader.close();
+							
+							
 							System.out.println("l'image a été récu");
 							//sobeliser
+							//Sobel sobel = new Sobel();
+							//sobel.process(reader)
+							
+							reader.close();
 							
 							//envoyer l'image
 
