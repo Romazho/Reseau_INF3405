@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -150,17 +151,12 @@ public class Client {
 		try {
 			System.out.println("Quel est le nom de l'image que vous souhaitez 'Sobeliser'? (spécifier le format de l'image)");
 			String imageName = inputSc.nextLine();
-			out.writeUTF(imageName);
 			
 			System.out.println("Donnez le nom de l'image 'sobeliser' (spécifier le format de l'image)");
 			String resultName = inputSc.nextLine();
-			out.writeUTF(resultName);
-			//File finalImageName = new File( "./src/" + resultName );
 			
 			BufferedImage image = ImageIO.read(new File( "./src/" + imageName ));
-			
-			//BufferedImage resultImage = ImageIO.read(finalImageName);
-			
+						
 		    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 	        ImageIO.write(image, "jpg", byteArrayOutputStream);
 
@@ -172,6 +168,21 @@ public class Client {
 	        
 			System.out.println("image envoyé au serveur");
 	        
+			//recevoir l'image et dire où l'image a été stocké
+			byte[] sizeAr = new byte[4];
+	        in.read(sizeAr);
+	        int sizeBuffer = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+	        byte[] imageAr = new byte[sizeBuffer];
+	        in.read(imageAr);
+			
+	        image = ImageIO.read(new ByteArrayInputStream(imageAr));
+	        String imagePlace = "./src/" + resultName;
+	        
+	        ImageIO.write(image, "jpg", new File(imagePlace));
+			System.out.println("Image sauvgarder sous: " + imagePlace);
+
+			
 	    	//out.close();
 			//in.close();
 	    	

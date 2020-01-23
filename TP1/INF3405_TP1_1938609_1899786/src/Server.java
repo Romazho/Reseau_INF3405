@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -166,12 +167,9 @@ public class Server {
 						userRequest = in.readUTF();
 						if(userRequest.equals("sobel")) {
 							out.writeUTF("sobel");
-							//recevoir l'image envoyé du client
-							String imageName = in.readUTF();
-							String resultName = in.readUTF();
 							
 							///////////////////////////////////////////////////////////////
-					        System.out.println("Reading: " + System.currentTimeMillis());
+					        //System.out.println("Reading: " + System.currentTimeMillis());
 
 					        byte[] sizeAr = new byte[4];
 					        in.read(sizeAr);
@@ -183,19 +181,21 @@ public class Server {
 					        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
 					        
 					    	//sobeliser
-							Sobel sobel = new Sobel();
-							image = sobel.process(image);
+							//Sobel sobel = new Sobel();
+							image = Sobel.process(image);
+							
+							System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
 
 							//envoyer l'image
+							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+					        ImageIO.write(image, "jpg", byteArrayOutputStream);
 
-							
-					        System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
-					        ImageIO.write(image, "jpg", new File("./src/" + resultName));
-							///////////////////////////////////////////////////////////////
-							
-							System.out.println("l'image a été récu");
-						
-														
+					        byte[] imageSize = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+					        out.write(imageSize);
+					        out.write(byteArrayOutputStream.toByteArray());
+					        out.flush();
+					        
+							///////////////////////////////////////////////////////////////					
 
 						}
 						out.writeUTF(userRequest.toUpperCase());
