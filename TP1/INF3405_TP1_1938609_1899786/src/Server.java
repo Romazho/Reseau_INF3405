@@ -123,6 +123,7 @@ public class Server {
 		private int clientNumber;
 		private DataOutputStream out;
 		private DataInputStream in;
+		Sobel sobel;
 		
 		public ClientHandler(Socket socket, int clientNumber) {
 			this.sock = socket;
@@ -166,7 +167,7 @@ public class Server {
 					while(!userRequest.equals("exit")) {
 						userRequest = in.readUTF();
 						if(userRequest.equals("sobel")) {
-							out.writeUTF("sobel");
+							//out.writeUTF("sobel");
 							
 							///////////////////////////////////////////////////////////////
 					        //System.out.println("Reading: " + System.currentTimeMillis());
@@ -181,7 +182,7 @@ public class Server {
 					        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
 					        
 					    	//sobeliser
-							//Sobel sobel = new Sobel();
+					        //sobel = new Sobel();
 							image = Sobel.process(image);
 							
 							System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
@@ -189,9 +190,12 @@ public class Server {
 							//envoyer l'image
 							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 					        ImageIO.write(image, "jpg", byteArrayOutputStream);
+					        //System.out.println(image);
 
 					        byte[] imageSize = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-					        out.write(imageSize);
+					        System.out.println(imageSize); ////////
+
+					        out.write(imageSize); // crash or a wait
 					        out.write(byteArrayOutputStream.toByteArray());
 					        out.flush();
 					        

@@ -130,9 +130,9 @@ public class Client {
 
 				out.writeUTF(userRequest);
 
-				serverResponse = in.readUTF();
+				//serverResponse = in.readUTF();
 
-				if(serverResponse.equals("sobel")) {
+				if(userRequest.equals("sobel")) {
 					sendImage();
 					//attendre que le serveur nous envoie l'image sobeliser
 					//recvoire l'image et la sauvgarder localement.
@@ -144,13 +144,11 @@ public class Client {
 	}
 	
 	private static void sendImage() {
-		//  BufferedImage image = ImageIO.read(new File("./src/potato.png"));
-		
-		//https://www.daniweb.com/programming/software-development/threads/370592/send-image-to-client-over-a-socket
-
 		try {
 			System.out.println("Quel est le nom de l'image que vous souhaitez 'Sobeliser'? (spécifier le format de l'image)");
 			String imageName = inputSc.nextLine();
+			
+			//quoi faire si l'image n'existe pas?
 			
 			System.out.println("Donnez le nom de l'image 'sobeliser' (spécifier le format de l'image)");
 			String resultName = inputSc.nextLine();
@@ -172,14 +170,19 @@ public class Client {
 			byte[] sizeAr = new byte[4];
 	        in.read(sizeAr);
 	        int sizeBuffer = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+			//System.out.println(sizeBuffer);
 
 	        byte[] imageAr = new byte[sizeBuffer];
 	        in.read(imageAr);
+			//System.out.println(imageAr);
 			
-	        image = ImageIO.read(new ByteArrayInputStream(imageAr));
+			System.out.println(image);
+	        BufferedImage newImage = ImageIO.read(new ByteArrayInputStream(imageAr));
+			System.out.println(newImage);
+
 	        String imagePlace = "./src/" + resultName;
 	        
-	        ImageIO.write(image, "jpg", new File(imagePlace));
+	        ImageIO.write(newImage, "jpg", new File(imagePlace));
 			System.out.println("Image sauvgarder sous: " + imagePlace);
 
 			
