@@ -47,7 +47,7 @@ public class Server {
 		
 		String serverAddress = "127.0.0.1";
 		Scanner S = new Scanner(System.in);
-		serverAddress = S.next();
+		//serverAddress = S.next();
 		
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
@@ -56,7 +56,7 @@ public class Server {
 
 		int port = 5000;	
 		System.out.println("Séléctionner votre port:");
-		port = S.nextInt();
+		//port = S.nextInt();
 
 		//vérification de la cohérence du port
 		while(port < 5000 || port > 5050) {
@@ -123,6 +123,7 @@ public class Server {
 		private int clientNumber;
 		private DataOutputStream out;
 		private DataInputStream in;
+		private String userRequest;
 		Sobel sobel;
 		
 		public ClientHandler(Socket socket, int clientNumber) {
@@ -138,7 +139,7 @@ public class Server {
 		}
 		
 		public void run() {
-			String userRequest = "";
+			userRequest = "";
 			try {
 				String name = in.readUTF();
 				boolean isExistantUser = isUsernameRegistered(name);
@@ -152,13 +153,13 @@ public class Server {
 				if(!isExistantUser) {
 					registerPassword(password);
 					out.writeUTF("newuser");
-					out.writeUTF("Hello from server - you are client# " + clientNumber);
-				} else if(validateUser(name, password)) {
-					out.writeUTF("Hello from server - you are client# " + clientNumber);	
-				} else {
+				} else if(!validateUser(name, password)) {
 					out.writeUTF("wrongpassword");
 					userRequest = "exit";
+				} else {
+					out.writeUTF("ok");
 				}
+				out.writeUTF("Hello from server - you are client# " + clientNumber);
 				
 			} catch (IOException e) {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);

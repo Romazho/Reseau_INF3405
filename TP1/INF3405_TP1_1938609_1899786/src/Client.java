@@ -27,6 +27,7 @@ public class Client {
 	private static String serverAddress;
 	private static DataInputStream in;
 	private static DataOutputStream out;
+	private static String serverResponse;
 
 	//source: https://www.techiedelight.com/validate-ip-address-java/
 	private static final String IPv4_REGEX = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
@@ -39,15 +40,14 @@ public class Client {
 		inputSc = new Scanner(System.in);
 
 		createSocket();
-		
-		//sendImage();
 
 		askUserCredentials();
-
-		processUserRequests();
-
-		sock.close();
-		inputSc.close();
+		
+		if(!sock.isClosed()) {
+			processUserRequests();
+			sock.close();
+			inputSc.close();
+		}
 	}
 
 	public static boolean isValidInet4Address(String ip) {
@@ -62,7 +62,8 @@ public class Client {
 
 	private static void createSocket() throws UnknownHostException, IOException {
 		System.out.println("Séléctionnez votre adresse IP:");
-		serverAddress = inputSc.nextLine();
+		//serverAddress = inputSc.nextLine();
+		serverAddress = "127.0.0.1";
 
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
@@ -71,7 +72,7 @@ public class Client {
 
 		port = 5000;
 		System.out.println("Sélectionnez votre port:");
-		port = inputSc.nextInt();
+		//port = inputSc.nextInt();
 
 		// vérification de la cohérence du port
 		while (port < 5000 || port > 5050) {
@@ -79,7 +80,7 @@ public class Client {
 			port = inputSc.nextInt();
 		}
 
-		inputSc.nextLine();
+		//inputSc.nextLine();
 
 		sock = new Socket(serverAddress, port);
 		in = new DataInputStream(sock.getInputStream());
@@ -87,7 +88,7 @@ public class Client {
 	}
 
 	private static void askUserCredentials() throws IOException {
-		String serverResponse = "";
+		serverResponse = "";
 		
 		System.out.println("Veuillez entrer votre nom d'utilisateur:");
 		String username = inputSc.nextLine();
@@ -104,19 +105,21 @@ public class Client {
 		String password = inputSc.nextLine();
 		out.writeUTF(password);
 		
-		//serverResponse = in.readUTF();
-		
-		System.out.println(serverResponse);
+		serverResponse = in.readUTF();
 		
 		if(serverResponse.equals("newuser")) {
 			System.out.println("Mot de passe ajoute");
+		} else if(serverResponse.equals("wrongpassword")) {
+			System.out.println("Mot de passe incorrect, deconnexion");
+			sock.close();
+			inputSc.close();
+		} else if(serverResponse.equals("ok")) {
+			System.out.println("Connexion reussi");
 		}
 	}
 
 	private static void processUserRequests() throws IOException {
 		String userRequest = "";
-
-		System.out.println("in processUserRequests");
 		
 		String serverResponse = in.readUTF();
 
