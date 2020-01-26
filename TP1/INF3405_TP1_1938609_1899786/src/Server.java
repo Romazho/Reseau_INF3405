@@ -27,60 +27,58 @@ import javax.imageio.ImageIO;
 public class Server {
 	private static ServerSocket listener;
 	private static Map<String, String> nameAndPasswordMap;
-	
-	//source: https://www.techiedelight.com/validate-ip-address-java/
-	private static final String IPv4_REGEX =
-			"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+
+	// source: https://www.techiedelight.com/validate-ip-address-java/
+	private static final String IPv4_REGEX = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
+			+ "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
+			+ "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
 
 	private static final Pattern IPv4_PATTERN = Pattern.compile(IPv4_REGEX);
-	
+
 	public static void main(String[] args) throws Exception {
 		int clientCounter = 0;
 		nameAndPasswordMap = new HashMap<String, String>();
-		
+
 		readUsers();
-				
+
 		System.out.println("Séléctionner votre adresse IP:");
-		
+
 		String serverAddress = "127.0.0.1";
 		Scanner S = new Scanner(System.in);
-		//serverAddress = S.next();
-		
+		// serverAddress = S.next();
+
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
 			serverAddress = S.next();
 		}
 
-		int port = 5000;	
+		int port = 5000;
 		System.out.println("Séléctionner votre port:");
-		//port = S.nextInt();
+		// port = S.nextInt();
 
-		//vérification de la cohérence du port
-		while(port < 5000 || port > 5050) {
+		// vérification de la cohérence du port
+		while (port < 5000 || port > 5050) {
 			System.out.println("Veuillez entrer un port entre 5000 et 5050:");
 			port = S.nextInt();
 		}
 
 		S.close();
-		
+
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
 		InetAddress serverIP = InetAddress.getByName(serverAddress);
 		listener.bind(new InetSocketAddress(serverIP, port));
 		System.out.format("Server running on %s:%d%n", serverAddress, port);
-		
+
 		try {
-			while(true) {
+			while (true) {
 				new ClientHandler(listener.accept(), clientCounter++).start();
 			}
 		} finally {
 			listener.close();
 		}
 	}
-	
+
 	public static boolean isValidInet4Address(String ip) {
 		if (ip == null) {
 			return false;
@@ -90,34 +88,34 @@ public class Server {
 
 		return matcher.matches();
 	}
-	
+
 	private static void readUsers() {
 		try {
 			File fileDesc = new File("./src/users.txt");
 			Scanner reader = new Scanner(fileDesc);
-			
-			while(reader.hasNextLine()) {
+
+			while (reader.hasNextLine()) {
 				String line = reader.nextLine();
-				
+
 				String[] nameAndPassword = line.split(" ");
-				
+
 				nameAndPasswordMap.put(nameAndPassword[0], nameAndPassword[1]);
 			}
-			
+
 			reader.close();
-			
-		} catch(FileNotFoundException error) {
+
+		} catch (FileNotFoundException error) {
 			System.out.println(error);
 			error.printStackTrace();
 		}
-		
+
 		// REMOVE WHEN DONE
 //		for(Map.Entry<String,String> entry : nameAndPasswordMap.entrySet()) {
 //			System.out.println(entry.getKey());
 //			System.out.println(entry.getValue());
 //		}
 	}
-	
+
 	private static class ClientHandler extends Thread {
 		private Socket sock;
 		private int clientNumber;
@@ -125,127 +123,161 @@ public class Server {
 		private DataInputStream in;
 		private String userRequest;
 		Sobel sobel;
-		
+
 		public ClientHandler(Socket socket, int clientNumber) {
 			this.sock = socket;
 			this.clientNumber = clientNumber;
 			try {
 				out = new DataOutputStream(sock.getOutputStream());
 				in = new DataInputStream(sock.getInputStream());
-			}catch(IOException e) {
+			} catch (IOException e) {
 				System.out.println(e);
 			}
 			System.out.println("New connection with client# " + clientNumber + " at " + socket);
 		}
-		
+
 		public void run() {
 			userRequest = "";
 			try {
 				String name = in.readUTF();
 				boolean isExistantUser = isUsernameRegistered(name);
-				if(!isExistantUser) {
+				if (!isExistantUser) {
 					registerUsername(name);
 					out.writeUTF("usernull");
 				} else {
 					out.writeUTF("ok");
 				}
 				String password = in.readUTF();
-				if(!isExistantUser) {
+				if (!isExistantUser) {
 					registerPassword(password);
 					out.writeUTF("newuser");
-				} else if(!validateUser(name, password)) {
+				} else if (!validateUser(name, password)) {
 					out.writeUTF("wrongpassword");
 					userRequest = "exit";
 				} else {
 					out.writeUTF("ok");
 				}
 				out.writeUTF("Hello from server - you are client# " + clientNumber);
-				
+
 			} catch (IOException e) {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);
 			} finally {
 				try {
-					while(!userRequest.equals("exit")) {
+					while (!userRequest.equals("exit")) {
 						userRequest = in.readUTF();
-						if(userRequest.equals("sobel")) {
-							//out.writeUTF("sobel");
-							
+						if (userRequest.equals("sobel")) {
+							String imageName = in.readUTF();
+							System.out.println("Image name " + imageName);
+							BufferedImage image = receiveImage();
+							BufferedImage processedImage = doSobel(image);
+							out.writeUTF(imageName.split(Pattern.quote("."))[1]);
+							sendImage(processedImage, imageName.split(Pattern.quote("."))[1]);
+							// out.writeUTF("sobel");
+
 							///////////////////////////////////////////////////////////////
-					        //System.out.println("Reading: " + System.currentTimeMillis());
+							// System.out.println("Reading: " + System.currentTimeMillis());
 
-					        byte[] sizeAr = new byte[4];
-					        in.read(sizeAr);
-					        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+//					        byte[] sizeAr = new byte[4];
+//					        in.read(sizeAr);
+//					        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+//
+//					        byte[] imageAr = new byte[size];
+//					        in.read(imageAr);
+//
+//					        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+//					        
+//					    	//sobeliser
+//					        //sobel = new Sobel();
+//							image = Sobel.process(image);
+//							
+//							System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
+//
+//							//envoyer l'image
+//							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//					        ImageIO.write(image, "jpg", byteArrayOutputStream);
+//					        //System.out.println(image);
+//
+//					        byte[] imageSize = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+//					        System.out.println(imageSize); ////////
+//
+//					        out.write(imageSize); // crash or a wait
+//					        out.write(byteArrayOutputStream.toByteArray());
+//					        out.flush();
 
-					        byte[] imageAr = new byte[size];
-					        in.read(imageAr);
-
-					        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
-					        
-					    	//sobeliser
-					        //sobel = new Sobel();
-							image = Sobel.process(image);
-							
-							System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
-
-							//envoyer l'image
-							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-					        ImageIO.write(image, "jpg", byteArrayOutputStream);
-					        //System.out.println(image);
-
-					        byte[] imageSize = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-					        System.out.println(imageSize); ////////
-
-					        out.write(imageSize); // crash or a wait
-					        out.write(byteArrayOutputStream.toByteArray());
-					        out.flush();
-					        
-							///////////////////////////////////////////////////////////////					
+							///////////////////////////////////////////////////////////////
 
 						}
-						out.writeUTF(userRequest.toUpperCase());
 					}
 					sock.close();
 				} catch (IOException e) {
 					System.out.println(e);
+					e.printStackTrace(System.out);
 				}
 				System.out.println("Connection with client# " + clientNumber + " closed.");
 			}
 		}
 		
+		//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+		private BufferedImage receiveImage() throws IOException {
+			byte[] size = new byte[Integer.BYTES];
+			in.read(size);
+			
+			int imageSize = ByteBuffer.wrap(size).asIntBuffer().get();
+			byte[] streamImage = new byte[imageSize];
+			in.read(streamImage);
+			
+			BufferedImage image = ImageIO.read(new ByteArrayInputStream(streamImage));
+			return image;
+		}
+		
+		private BufferedImage doSobel(BufferedImage image) throws IOException {
+			return Sobel.process(image);
+		}
+		
+		//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+		private void sendImage(BufferedImage image, String format) throws IOException {
+			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
+			ImageIO.write(image, format, byteArrOutStr);
+			
+			// Send the image size as a byte array.
+			byte[] size = ByteBuffer.allocate(Integer.BYTES).putInt(byteArrOutStr.size()).array();
+			out.write(size);
+			
+			// Send the actual image
+			out.write(byteArrOutStr.toByteArray());
+			out.flush();
+		}
+
 		private boolean isUsernameRegistered(String username) {
 			return nameAndPasswordMap.get(username) != null;
 		}
-		
+
 		private void registerUsername(String username) throws IOException {
 			FileWriter writer = new FileWriter("./src/users.txt", true);
 			PrintWriter printer = new PrintWriter(writer);
-			
+
 			printer.println();
 			printer.printf("%s", username);
-			
+
 			printer.close();
 			writer.close();
 		}
-		
+
 		private void registerPassword(String password) throws IOException {
 			FileWriter writer = new FileWriter("./src/users.txt", true);
 			PrintWriter printer = new PrintWriter(writer);
-			
+
 			printer.printf("%s", " " + password);
-			
+
 			printer.close();
 			writer.close();
 		}
-		
+
 		public boolean validateUser(String name, String password) throws IOException {
-			//System.out.println(password + " " + nameAndPasswordMap.get(name));
-			if((nameAndPasswordMap.get(name) != null) && (nameAndPasswordMap.get(name).equals(password))) {
-				//on vérifie le password
+			if ((nameAndPasswordMap.get(name) != null) && (nameAndPasswordMap.get(name).equals(password))) {
 				System.out.println("Utilisateur " + name + " connecte");
 				return true;
-			}
-			else {
+			} else {
 				System.out.println("Mot de passe incorrect pour " + name);
 				return false;
 			}
