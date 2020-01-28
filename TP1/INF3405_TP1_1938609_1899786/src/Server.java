@@ -52,7 +52,7 @@ public class Server {
 			serverAddress = S.next();
 		}
 
-		int port = 5000;
+		int port = 5001;
 		System.out.println("Séléctionner votre port:");
 		// port = S.nextInt();
 
@@ -172,40 +172,6 @@ public class Server {
 							BufferedImage processedImage = doSobel(image);
 							out.writeUTF(imageName.split(Pattern.quote("."))[1]);
 							sendImage(processedImage, imageName.split(Pattern.quote("."))[1]);
-							// out.writeUTF("sobel");
-
-							///////////////////////////////////////////////////////////////
-							// System.out.println("Reading: " + System.currentTimeMillis());
-
-//					        byte[] sizeAr = new byte[4];
-//					        in.read(sizeAr);
-//					        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
-//
-//					        byte[] imageAr = new byte[size];
-//					        in.read(imageAr);
-//
-//					        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
-//					        
-//					    	//sobeliser
-//					        //sobel = new Sobel();
-//							image = Sobel.process(image);
-//							
-//							System.out.println("Received " + image.getWidth()  + "x" + image.getHeight() + ": " + System.currentTimeMillis());
-//
-//							//envoyer l'image
-//							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//					        ImageIO.write(image, "jpg", byteArrayOutputStream);
-//					        //System.out.println(image);
-//
-//					        byte[] imageSize = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-//					        System.out.println(imageSize); ////////
-//
-//					        out.write(imageSize); // crash or a wait
-//					        out.write(byteArrayOutputStream.toByteArray());
-//					        out.flush();
-
-							///////////////////////////////////////////////////////////////
-
 						}
 					}
 					sock.close();
@@ -219,14 +185,27 @@ public class Server {
 		
 		//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
 		private BufferedImage receiveImage() throws IOException {
-			byte[] size = new byte[Integer.BYTES];
-			in.read(size);
+			//byte[] size = new byte[Integer.BYTES];
+			//in.read(size);
 			
-			int imageSize = ByteBuffer.wrap(size).asIntBuffer().get();
-			byte[] streamImage = new byte[imageSize];
-			in.read(streamImage);
+			//int imageSize = ByteBuffer.wrap(size).asIntBuffer().get();
+			//byte[] streamImage = new byte[imageSize];
+			//in.read(streamImage);
 			
-			BufferedImage image = ImageIO.read(new ByteArrayInputStream(streamImage));
+			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
+			byte[] dataChunk = new byte[1024];
+			int nBytesReceived = 0;
+			do {
+				nBytesReceived = in.read(dataChunk);
+				if (nBytesReceived < 0) {
+					throw new IOException();
+				}
+				byteArrOutStr.write(dataChunk, 0, nBytesReceived);
+			} while (nBytesReceived == 1024);
+			
+			byte[] data = byteArrOutStr.toByteArray();
+			BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
+			System.out.println(image);
 			return image;
 		}
 		
@@ -240,8 +219,8 @@ public class Server {
 			ImageIO.write(image, format, byteArrOutStr);
 			
 			// Send the image size as a byte array.
-			byte[] size = ByteBuffer.allocate(Integer.BYTES).putInt(byteArrOutStr.size()).array();
-			out.write(size);
+			//byte[] size = ByteBuffer.allocate(Integer.BYTES).putInt(byteArrOutStr.size()).array();
+			//out.write(size);
 			
 			// Send the actual image
 			out.write(byteArrOutStr.toByteArray());
