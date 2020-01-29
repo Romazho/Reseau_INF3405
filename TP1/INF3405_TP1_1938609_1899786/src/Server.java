@@ -15,6 +15,9 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -46,6 +49,7 @@ public class Server {
 		String serverAddress = "127.0.0.1";
 		Scanner S = new Scanner(System.in);
 		// serverAddress = S.next();
+		
 
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
@@ -122,7 +126,10 @@ public class Server {
 		private DataOutputStream out;
 		private DataInputStream in;
 		private String userRequest;
-		Sobel sobel;
+		private String username;
+		private int clientPort;
+		private String adresseIP;
+		private String imageName;
 
 		public ClientHandler(Socket socket, int clientNumber) {
 			this.sock = socket;
@@ -158,6 +165,9 @@ public class Server {
 					out.writeUTF("ok");
 				}
 				out.writeUTF("Hello from server - you are client# " + clientNumber);
+				clientPort = sock.getLocalPort();
+				adresseIP = sock.getInetAddress().toString();
+				username = name;
 
 			} catch (IOException e) {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);
@@ -166,7 +176,7 @@ public class Server {
 					while (!userRequest.equals("exit")) {
 						userRequest = in.readUTF();
 						if (userRequest.equals("sobel")) {
-							String imageName = in.readUTF();
+							imageName = in.readUTF();
 							System.out.println("Image name " + imageName);
 							BufferedImage image = receiveImage();
 							BufferedImage processedImage = doSobel(image);
@@ -182,16 +192,8 @@ public class Server {
 				System.out.println("Connection with client# " + clientNumber + " closed.");
 			}
 		}
-		
-		//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+
 		private BufferedImage receiveImage() throws IOException {
-			//byte[] size = new byte[Integer.BYTES];
-			//in.read(size);
-			
-			//int imageSize = ByteBuffer.wrap(size).asIntBuffer().get();
-			//byte[] streamImage = new byte[imageSize];
-			//in.read(streamImage);
-			
 			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
 			byte[] dataChunk = new byte[1024];
 			int nBytesReceived = 0;
@@ -205,7 +207,11 @@ public class Server {
 			
 			byte[] data = byteArrOutStr.toByteArray();
 			BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
-			System.out.println(image);
+			
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd@HH:mm:ss");
+			Date date = new Date();
+			System.out.println("[" + username + " - " + adresseIP.substring(1) + ":" + clientPort + " - " + dateFormat.format(date) + "]" + " : Image " + imageName + " recue pour traitement.");
+			
 			return image;
 		}
 		
