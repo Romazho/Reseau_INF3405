@@ -168,10 +168,6 @@ public class Client {
 		ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
 		ImageIO.write(image, imageName.split(Pattern.quote("."))[1], byteArrOutStr);
 		
-		// Send the image size as a byte array.
-		//byte[] size = ByteBuffer.allocate(Integer.BYTES).putInt(byteArrOutStr.size()).array();
-		//out.write(size);
-		
 		// Send the actual image
 		out.write(byteArrOutStr.toByteArray());
 		out.flush();
@@ -179,14 +175,6 @@ public class Client {
 	
 	//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
 	private static BufferedImage receiveImage() throws IOException {
-		//byte[] size = new byte[Integer.BYTES];
-		//in.read(size);
-		
-		//int imageSize = ByteBuffer.wrap(size).asIntBuffer().get();
-		//byte[] streamImage = new byte[imageSize];
-		/* in.read(streamImage); */
-		
-		//BufferedImage image = ImageIO.read(new ByteArrayInputStream(streamImage));
 		ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
 		byte[] dataChunk = new byte[1024];
 		int nBytesReceived = 0;

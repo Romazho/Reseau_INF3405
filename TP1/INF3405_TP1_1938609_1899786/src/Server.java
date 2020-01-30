@@ -224,10 +224,6 @@ public class Server {
 			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
 			ImageIO.write(image, format, byteArrOutStr);
 			
-			// Send the image size as a byte array.
-			//byte[] size = ByteBuffer.allocate(Integer.BYTES).putInt(byteArrOutStr.size()).array();
-			//out.write(size);
-			
 			// Send the actual image
 			out.write(byteArrOutStr.toByteArray());
 			out.flush();
