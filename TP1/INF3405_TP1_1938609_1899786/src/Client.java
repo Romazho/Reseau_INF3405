@@ -110,7 +110,20 @@ public class Client {
 		if (serverResponse.equals("newuser")) {
 			System.out.println("Mot de passe ajoute");
 		} else if (serverResponse.equals("wrongpassword")) {
-			System.out.println("Mot de passe incorrect, deconnexion");
+			while(serverResponse.equals("wrongpassword")) {
+				System.out.println("Mot de passe incorrect. Essayez d'entrer un autre mot de passe ou sortez (exit).");
+				password = inputSc.nextLine();
+				out.writeUTF(password);
+				serverResponse = in.readUTF();
+				if(serverResponse.equals("ok")) {
+					System.out.println("Connexion reussie");
+					return;
+				} else if(serverResponse.equals("exiting")) {
+					sock.close();
+					inputSc.close();
+					return;
+				}
+			}
 			sock.close();
 			inputSc.close();
 		} else if (serverResponse.equals("ok")) {
@@ -123,7 +136,7 @@ public class Client {
 
 		String serverResponse = in.readUTF();
 
-		if (!serverResponse.equals("wrongpassword")) {
+		if (!serverResponse.equals("wrongpassword") || !serverResponse.equals("exiting")) {
 			System.out.println(serverResponse);
 
 			while (!userRequest.equals("exit")) {
@@ -176,18 +189,25 @@ public class Client {
 	//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
 	private static BufferedImage receiveImage() throws IOException {
 		ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
-		byte[] dataChunk = new byte[1024];
-		int nBytesReceived = 0;
+		byte[] imageDataBuffer = new byte[1024];
+		int bytesReadCount = 0;
 		do {
-			nBytesReceived = in.read(dataChunk);
-			if (nBytesReceived < 0) {
+			bytesReadCount = in.read(imageDataBuffer);
+			if (bytesReadCount < 0) {
 				throw new IOException();
 			}
-			byteArrOutStr.write(dataChunk, 0, nBytesReceived);
-		} while (nBytesReceived == 1024);
+			byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
+		} while (bytesReadCount == 1024);
 		
+		BufferedImage image = createImage(byteArrOutStr);
+		
+		return image;
+	}
+	
+	private static BufferedImage createImage(ByteArrayOutputStream byteArrOutStr) throws IOException {
 		byte[] data = byteArrOutStr.toByteArray();
 		BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
+		
 		return image;
 	}
 	

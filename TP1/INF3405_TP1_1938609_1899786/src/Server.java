@@ -146,29 +146,7 @@ public class Server {
 		public void run() {
 			userRequest = "";
 			try {
-				String name = in.readUTF();
-				boolean isExistantUser = isUsernameRegistered(name);
-				if (!isExistantUser) {
-					registerUsername(name);
-					out.writeUTF("usernull");
-				} else {
-					out.writeUTF("ok");
-				}
-				String password = in.readUTF();
-				if (!isExistantUser) {
-					registerPassword(password);
-					out.writeUTF("newuser");
-				} else if (!validateUser(name, password)) {
-					out.writeUTF("wrongpassword");
-					userRequest = "exit";
-				} else {
-					out.writeUTF("ok");
-				}
-				out.writeUTF("Hello from server - you are client# " + clientNumber);
-				clientPort = sock.getLocalPort();
-				adresseIP = sock.getInetAddress().toString();
-				username = name;
-
+				setupUser();
 			} catch (IOException e) {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);
 			} finally {
@@ -184,6 +162,7 @@ public class Server {
 							sendImage(processedImage, imageName.split(Pattern.quote("."))[1]);
 						}
 					}
+					out.writeUTF("exiting");
 					sock.close();
 				} catch (IOException e) {
 					System.out.println(e);
@@ -195,22 +174,28 @@ public class Server {
 
 		private BufferedImage receiveImage() throws IOException {
 			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
-			byte[] dataChunk = new byte[1024];
-			int nBytesReceived = 0;
+			byte[] imageDataBuffer = new byte[1024];
+			int bytesReadCount = 0;
 			do {
-				nBytesReceived = in.read(dataChunk);
-				if (nBytesReceived < 0) {
+				bytesReadCount = in.read(imageDataBuffer);
+				if (bytesReadCount < 0) {
 					throw new IOException();
 				}
-				byteArrOutStr.write(dataChunk, 0, nBytesReceived);
-			} while (nBytesReceived == 1024);
+				byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
+			} while (bytesReadCount == 1024);
 			
-			byte[] data = byteArrOutStr.toByteArray();
-			BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
+			BufferedImage image = createImage(byteArrOutStr);
 			
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd@HH:mm:ss");
 			Date date = new Date();
 			System.out.println("[" + username + " - " + adresseIP.substring(1) + ":" + clientPort + " - " + dateFormat.format(date) + "]" + " : Image " + imageName + " recue pour traitement.");
+			
+			return image;
+		}
+		
+		private BufferedImage createImage(ByteArrayOutputStream byteArrOutStr) throws IOException {
+			byte[] data = byteArrOutStr.toByteArray();
+			BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
 			
 			return image;
 		}
@@ -227,6 +212,41 @@ public class Server {
 			// Send the actual image
 			out.write(byteArrOutStr.toByteArray());
 			out.flush();
+		}
+		
+		private void setupUser() throws IOException {
+			String name = in.readUTF();
+			boolean isExistantUser = isUsernameRegistered(name);
+			if (!isExistantUser) {
+				registerUsername(name);
+				out.writeUTF("usernull");
+			} else {
+				out.writeUTF("ok");
+			}
+			
+			String password = in.readUTF();
+			if (!isExistantUser) {
+				registerPassword(password);
+				out.writeUTF("newuser");
+			} else if (!validateUser(name, password)) {
+				while(!validateUser(name, password)) {
+					out.writeUTF("wrongpassword");
+					password = in.readUTF();
+					if(password.equals("exit")) {
+						userRequest = "exit";
+						out.writeUTF("exiting");
+						return;
+					}
+				}
+				out.writeUTF("ok");
+			} else {
+				out.writeUTF("ok");
+			}
+			
+			out.writeUTF("Hello from server - you are client# " + clientNumber);
+			clientPort = sock.getLocalPort();
+			adresseIP = sock.getInetAddress().toString();
+			username = name;
 		}
 
 		private boolean isUsernameRegistered(String username) {
