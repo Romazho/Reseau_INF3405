@@ -1,19 +1,12 @@
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,7 +54,7 @@ public class Client {
 	}
 
 	private static void createSocket() throws UnknownHostException, IOException {
-		System.out.println("Séléctionnez votre adresse IP:");
+		System.out.println("Sélectionnez votre adresse IP:");
 		// serverAddress = inputSc.nextLine();
 		serverAddress = "127.0.0.1";
 
@@ -110,6 +103,7 @@ public class Client {
 		if (serverResponse.equals(Generals.ServerResponses.NEW_USER)) {
 			System.out.println("Mot de passe ajoute");
 		} else if (serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
+			
 			while(serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
 				System.out.println("Mot de passe incorrect. Essayez d'entrer un autre mot de passe ou sortez (exit).");
 				password = inputSc.nextLine();
@@ -124,6 +118,7 @@ public class Client {
 					return;
 				}
 			}
+			
 			sock.close();
 			inputSc.close();
 		} else if (serverResponse.equals(Generals.ServerResponses.OK)) {
@@ -194,11 +189,10 @@ public class Client {
 		out.write(byteArrOutStr.toByteArray());
 		out.flush();
 	}
-	
-	//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+
 	private static BufferedImage receiveImage() throws IOException {
 		ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
-		byte[] imageDataBuffer = new byte[1024];
+		byte[] imageDataBuffer = new byte[Generals.BUFFER_SIZE];
 		int bytesReadCount = 0;
 		do {
 			bytesReadCount = in.read(imageDataBuffer);
@@ -206,7 +200,7 @@ public class Client {
 				throw new IOException();
 			}
 			byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
-		} while (bytesReadCount == 1024);
+		} while (bytesReadCount == Generals.BUFFER_SIZE);
 		
 		BufferedImage image = createImage(byteArrOutStr);
 		

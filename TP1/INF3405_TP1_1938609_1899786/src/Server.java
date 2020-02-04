@@ -108,12 +108,6 @@ public class Server {
 			System.out.println(error);
 			error.printStackTrace();
 		}
-
-		// REMOVE WHEN DONE
-//		for(Map.Entry<String,String> entry : nameAndPasswordMap.entrySet()) {
-//			System.out.println(entry.getKey());
-//			System.out.println(entry.getValue());
-//		}
 	}
 
 	private static class ClientHandler extends Thread {

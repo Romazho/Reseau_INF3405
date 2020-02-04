@@ -1,4 +1,5 @@
 public class Generals {
+	public static final int BUFFER_SIZE = 1024;
 	public class ServerResponses {
 		public static final String OK = "OK";
 		public static final String ERROR = "ERROR";
