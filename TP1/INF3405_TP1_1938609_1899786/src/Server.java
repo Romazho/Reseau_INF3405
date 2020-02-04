@@ -1,11 +1,9 @@
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,14 +12,12 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -151,9 +147,9 @@ public class Server {
 				System.out.println("Error handling client# " + clientNumber + ": " + e);
 			} finally {
 				try {
-					while (!userRequest.equals("exit")) {
+					while (!userRequest.equals(Generals.ClientRequests.EXIT)) {
 						userRequest = in.readUTF();
-						if (userRequest.equals("sobel")) {
+						if (userRequest.equals(Generals.ClientRequests.SOBEL)) {
 							imageName = in.readUTF();
 							System.out.println("Image name " + imageName);
 							BufferedImage image = receiveImage();
@@ -162,7 +158,7 @@ public class Server {
 							sendImage(processedImage, imageName.split(Pattern.quote("."))[1]);
 						}
 					}
-					out.writeUTF("exiting");
+					out.writeUTF(Generals.ServerResponses.DISCONNECTING);
 					sock.close();
 				} catch (IOException e) {
 					System.out.println(e);
@@ -219,28 +215,28 @@ public class Server {
 			boolean isExistantUser = isUsernameRegistered(name);
 			if (!isExistantUser) {
 				registerUsername(name);
-				out.writeUTF("usernull");
+				out.writeUTF(Generals.ServerResponses.NEW_USER);
 			} else {
-				out.writeUTF("ok");
+				out.writeUTF(Generals.ServerResponses.OK);
 			}
 			
 			String password = in.readUTF();
 			if (!isExistantUser) {
 				registerPassword(password);
-				out.writeUTF("newuser");
+				out.writeUTF(Generals.ServerResponses.NEW_USER);
 			} else if (!validateUser(name, password)) {
 				while(!validateUser(name, password)) {
-					out.writeUTF("wrongpassword");
+					out.writeUTF(Generals.ServerResponses.WRONG_PASSWORD);
 					password = in.readUTF();
-					if(password.equals("exit")) {
-						userRequest = "exit";
-						out.writeUTF("exiting");
+					if(password.equals(Generals.ClientRequests.EXIT)) {
+						userRequest = Generals.ClientRequests.EXIT;
+						out.writeUTF(Generals.ServerResponses.DISCONNECTING);
 						return;
 					}
 				}
-				out.writeUTF("ok");
+				out.writeUTF(Generals.ServerResponses.OK);
 			} else {
-				out.writeUTF("ok");
+				out.writeUTF(Generals.ServerResponses.OK);
 			}
 			
 			out.writeUTF("Hello from server - you are client# " + clientNumber);

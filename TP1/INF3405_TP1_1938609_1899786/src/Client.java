@@ -96,7 +96,7 @@ public class Client {
 
 		serverResponse = in.readUTF();
 
-		if (serverResponse.equals("usernull")) {
+		if (serverResponse.equals(Generals.ServerResponses.NEW_USER)) {
 			System.out
 					.println(username + " n'existe pas dans la base de donnees. Creation de l'utilisateur " + username);
 		}
@@ -107,18 +107,18 @@ public class Client {
 
 		serverResponse = in.readUTF();
 
-		if (serverResponse.equals("newuser")) {
+		if (serverResponse.equals(Generals.ServerResponses.NEW_USER)) {
 			System.out.println("Mot de passe ajoute");
-		} else if (serverResponse.equals("wrongpassword")) {
-			while(serverResponse.equals("wrongpassword")) {
+		} else if (serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
+			while(serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
 				System.out.println("Mot de passe incorrect. Essayez d'entrer un autre mot de passe ou sortez (exit).");
 				password = inputSc.nextLine();
 				out.writeUTF(password);
 				serverResponse = in.readUTF();
-				if(serverResponse.equals("ok")) {
+				if(serverResponse.equals(Generals.ServerResponses.OK)) {
 					System.out.println("Connexion reussie");
 					return;
-				} else if(serverResponse.equals("exiting")) {
+				} else if(serverResponse.equals(Generals.ServerResponses.DISCONNECTING)) {
 					sock.close();
 					inputSc.close();
 					return;
@@ -126,32 +126,41 @@ public class Client {
 			}
 			sock.close();
 			inputSc.close();
-		} else if (serverResponse.equals("ok")) {
+		} else if (serverResponse.equals(Generals.ServerResponses.OK)) {
 			System.out.println("Connexion reussie");
 		}
 	}
 
 	private static void processUserRequests() throws IOException {
-		String userRequest = "";
+		String userRequest = "0";
 
 		String serverResponse = in.readUTF();
 
-		if (!serverResponse.equals("wrongpassword") || !serverResponse.equals("exiting")) {
+		if (!serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD) || !serverResponse.equals(Generals.ServerResponses.DISCONNECTING)) {
 			System.out.println(serverResponse);
 
-			while (!userRequest.equals("exit")) {
-				System.out.println("Que souhaitez-vous faire? Sortir (exit) ou 'sobelizer' une image (sobel)");
+			while (!(Integer.parseInt(userRequest) == 1)) {
+				System.out.println("Que souhaitez-vous faire (entrer le chiffre associe aux options ci-dessous)?");
+				System.out.println("1 -> EXIT");
+				System.out.println("2 -> SOBEL");
 
 				userRequest = inputSc.nextLine();
-
-				out.writeUTF(userRequest);
-
-				if (userRequest.equals("sobel")) {
+				
+				switch(Integer.parseInt(userRequest)) {
+				case 1:
+					out.writeUTF(Generals.ClientRequests.EXIT);
+					break;
+				case 2:
+					out.writeUTF(Generals.ClientRequests.SOBEL);
 					prepareImage();
 					String imageFormat = in.readUTF();
 					System.out.println("Image format " + imageFormat);
 					BufferedImage processedImage = receiveImage();
 					saveImage(processedImage, imageFormat);
+					break;
+				default:
+					System.out.println("Bruh just enter 1 or 2");
+					break;
 				}
 
 				System.out.println(serverResponse);
