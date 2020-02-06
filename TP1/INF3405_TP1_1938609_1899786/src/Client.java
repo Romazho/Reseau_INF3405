@@ -55,17 +55,17 @@ public class Client {
 
 	private static void createSocket() throws UnknownHostException, IOException {
 		System.out.println("Sélectionnez votre adresse IP:");
-		// serverAddress = inputSc.nextLine();
-		serverAddress = "127.0.0.1";
+		serverAddress = inputSc.nextLine();
+		//serverAddress = "127.0.0.1";
 
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
 			serverAddress = inputSc.nextLine();
 		}
 
-		port = 5001;
+		//port = 5001;
 		System.out.println("Sélectionnez votre port:");
-		// port = inputSc.nextInt();
+		port = inputSc.nextInt();
 
 		// vérification de la cohérence du port
 		while (port < 5000 || port > 5050) {
@@ -73,7 +73,7 @@ public class Client {
 			port = inputSc.nextInt();
 		}
 
-		// inputSc.nextLine();
+		inputSc.nextLine();
 
 		sock = new Socket(serverAddress, port);
 		in = new DataInputStream(sock.getInputStream());
@@ -103,7 +103,6 @@ public class Client {
 		if (serverResponse.equals(Generals.ServerResponses.NEW_USER)) {
 			System.out.println("Mot de passe ajoute");
 		} else if (serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
-			
 			while(serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
 				System.out.println("Mot de passe incorrect. Essayez d'entrer un autre mot de passe ou sortez (exit).");
 				password = inputSc.nextLine();
@@ -166,12 +165,12 @@ public class Client {
 	private static void prepareImage() throws IOException {
 		System.out.println("Quel est le nom de l'image (son extension de format) a sobeliser? (p.e. image1.jpg)");
 		String imageName = inputSc.nextLine();
-		File imageFile = new File("./src/" + imageName);
+		File imageFile = new File("./" + imageName);
 
 		while (!imageFile.canRead()) {
-			System.out.println("Impossible de lire le fichier ./src/" + imageName + ". Veuillez reessayer. L'image doit se trouver dans le repertoire courant.");
+			System.out.println("Impossible de lire le fichier ./" + imageName + ". Veuillez reessayer. L'image doit se trouver dans le repertoire courant.");
 			imageName = inputSc.nextLine();
-			imageFile = new File("./src/" + imageName);
+			imageFile = new File("./" + imageName);
 		}
 		
 		out.writeUTF(imageName);
@@ -219,14 +218,14 @@ public class Client {
 		String newImageName = inputSc.nextLine();
 		
 		try {
-			File newImageFile = new File("./src/" + newImageName + "." + format);
+			File newImageFile = new File("./" + newImageName + "." + format);
 			ImageIO.write(imageToSave, format, newImageFile);
 		} catch(Exception e) {
 			System.out.println("Erreur pendant la sauvegarde de la nouvelle image");
 			System.out.println(e.getMessage());
 		}
 		
-		System.out.println("Image sauvegardee sous ./src/" + newImageName + "." + format);
+		System.out.println("Image sauvegardee sous /" + newImageName + "." + format);
 	}
 
 }

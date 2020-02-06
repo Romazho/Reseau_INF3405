@@ -42,9 +42,9 @@ public class Server {
 
 		System.out.println("Séléctionner votre adresse IP:");
 
-		String serverAddress = "127.0.0.1";
+		String serverAddress = "";
 		Scanner S = new Scanner(System.in);
-		// serverAddress = S.next();
+		serverAddress = S.next();
 		
 
 		while (!isValidInet4Address(serverAddress)) {
@@ -52,9 +52,9 @@ public class Server {
 			serverAddress = S.next();
 		}
 
-		int port = 5001;
+		int port = 0;
 		System.out.println("Séléctionner votre port:");
-		// port = S.nextInt();
+		port = S.nextInt();
 
 		// vérification de la cohérence du port
 		while (port < 5000 || port > 5050) {
@@ -91,10 +91,10 @@ public class Server {
 
 	private static void readUsers() {
 		try {
-			File fileDesc = new File("./src/users.txt");
+			File fileDesc = new File("./users.txt");
 			Scanner reader = new Scanner(fileDesc);
 
-			while (reader.hasNextLine()) {
+			while (reader.hasNextLine() && fileDesc.length() != 0) {
 				String line = reader.nextLine();
 
 				String[] nameAndPassword = line.split(" ");
@@ -164,7 +164,7 @@ public class Server {
 
 		private BufferedImage receiveImage() throws IOException {
 			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
-			byte[] imageDataBuffer = new byte[1024];
+			byte[] imageDataBuffer = new byte[8192];
 			int bytesReadCount = 0;
 			do {
 				bytesReadCount = in.read(imageDataBuffer);
@@ -172,7 +172,7 @@ public class Server {
 					throw new IOException();
 				}
 				byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
-			} while (bytesReadCount == 1024);
+			} while (bytesReadCount == 8192);
 			
 			BufferedImage image = createImage(byteArrOutStr);
 			
@@ -244,18 +244,20 @@ public class Server {
 		}
 
 		private void registerUsername(String username) throws IOException {
-			FileWriter writer = new FileWriter("./src/users.txt", true);
+			File fileDesc = new File("./users.txt");
+			FileWriter writer = new FileWriter("./users.txt", true);
 			PrintWriter printer = new PrintWriter(writer);
-
-			printer.println();
+			
+			if(fileDesc.length() > 0) {
+				printer.println();	
+			}
 			printer.printf("%s", username);
-
 			printer.close();
 			writer.close();
 		}
 
 		private void registerPassword(String password) throws IOException {
-			FileWriter writer = new FileWriter("./src/users.txt", true);
+			FileWriter writer = new FileWriter("./users.txt", true);
 			PrintWriter printer = new PrintWriter(writer);
 
 			printer.printf("%s", " " + password);
