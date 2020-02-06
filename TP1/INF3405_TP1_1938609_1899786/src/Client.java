@@ -185,23 +185,26 @@ public class Client {
 		ImageIO.write(image, imageName.split(Pattern.quote("."))[1], byteArrOutStr);
 		
 		// Send the actual image
+		out.writeInt(byteArrOutStr.size());
 		out.write(byteArrOutStr.toByteArray());
 		out.flush();
 	}
 
 	private static BufferedImage receiveImage() throws IOException {
 		ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
-		byte[] imageDataBuffer = new byte[Generals.BUFFER_SIZE];
-		int bytesReadCount = 0;
-		do {
-			bytesReadCount = in.read(imageDataBuffer);
-			if (bytesReadCount < 0) {
-				throw new IOException();
-			}
-			byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
-		} while (bytesReadCount == Generals.BUFFER_SIZE);
+		int count = in.readInt();
+		byte[] imageDataBuffer = new byte[count];
+//		int bytesReadCount = 0;
+//		do {
+//			bytesReadCount = in.read(imageDataBuffer);
+//			if (bytesReadCount < 0) {
+//				throw new IOException();
+//			}
+//			byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
+//		} while (bytesReadCount == Generals.BUFFER_SIZE);
+		in.readFully(imageDataBuffer);
 		
-		BufferedImage image = createImage(byteArrOutStr);
+		BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageDataBuffer));
 		
 		return image;
 	}

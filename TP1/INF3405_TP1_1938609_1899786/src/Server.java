@@ -163,18 +163,13 @@ public class Server {
 		}
 
 		private BufferedImage receiveImage() throws IOException {
-			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
-			byte[] imageDataBuffer = new byte[8192];
-			int bytesReadCount = 0;
-			do {
-				bytesReadCount = in.read(imageDataBuffer);
-				if (bytesReadCount < 0) {
-					throw new IOException();
-				}
-				byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
-			} while (bytesReadCount == 8192);
+			int count = in.readInt();
+			byte[] imageDataBuffer = new byte[count];
+			in.readFully(imageDataBuffer);
 			
-			BufferedImage image = createImage(byteArrOutStr);
+			BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageDataBuffer));
+			
+			//BufferedImage image = createImage(byteArrOutStr);
 			
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd@HH:mm:ss");
 			Date date = new Date();
@@ -200,6 +195,7 @@ public class Server {
 			ImageIO.write(image, format, byteArrOutStr);
 			
 			// Send the actual image
+			out.writeInt(byteArrOutStr.size());
 			out.write(byteArrOutStr.toByteArray());
 			out.flush();
 		}
