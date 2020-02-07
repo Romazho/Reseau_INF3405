@@ -38,8 +38,6 @@ public class Server {
 		int clientCounter = 0;
 		nameAndPasswordMap = new HashMap<String, String>();
 
-		readUsers();
-
 		System.out.println("Séléctionner votre adresse IP:");
 
 		String serverAddress = "";
@@ -90,6 +88,7 @@ public class Server {
 
 	private static void readUsers() {
 		try {
+			nameAndPasswordMap.clear();
 			File fileDesc = new File("./users.txt");
 			Scanner reader = new Scanner(fileDesc);
 
@@ -225,6 +224,7 @@ public class Server {
 		}
 
 		private boolean isUsernameRegistered(String username) {
+			readUsers();
 			return nameAndPasswordMap.get(username) != null;
 		}
 
