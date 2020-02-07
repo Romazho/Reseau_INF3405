@@ -56,14 +56,12 @@ public class Client {
 	private static void createSocket() throws UnknownHostException, IOException {
 		System.out.println("Sélectionnez votre adresse IP:");
 		serverAddress = inputSc.nextLine();
-		//serverAddress = "127.0.0.1";
 
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
 			serverAddress = inputSc.nextLine();
 		}
 
-		//port = 5001;
 		System.out.println("Sélectionnez votre port:");
 		port = inputSc.nextInt();
 
@@ -219,6 +217,7 @@ public class Client {
 		System.out.println("Image reçue et sauvegardee sous /" + newImageName + "." + format);
 	}
 
+	//source : https://stackoverflow.com/questions/14206768/how-to-check-if-a-string-is-numeric
 	private static boolean isNumeric(String s) {  
 	    return s != null && s.matches("[-+]?\\d*\\.?\\d+");  
 	}  
