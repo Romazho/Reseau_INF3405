@@ -45,7 +45,6 @@ public class Server {
 		String serverAddress = "";
 		Scanner S = new Scanner(System.in);
 		serverAddress = S.next();
-		
 
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
@@ -68,7 +67,7 @@ public class Server {
 		listener.setReuseAddress(true);
 		InetAddress serverIP = InetAddress.getByName(serverAddress);
 		listener.bind(new InetSocketAddress(serverIP, port));
-		System.out.format("Server running on %s:%d%n", serverAddress, port);
+		System.out.format("Le serveur roule sur %s:%d%n", serverAddress, port);
 
 		try {
 			while (true) {
@@ -130,7 +129,7 @@ public class Server {
 			} catch (IOException e) {
 				System.out.println(e);
 			}
-			System.out.println("New connection with client# " + clientNumber + " at " + socket);
+			System.out.println("Nouvelle connexion avec le client #" + clientNumber + " à " + socket);
 		}
 
 		public void run() {
@@ -138,14 +137,13 @@ public class Server {
 			try {
 				setupUser();
 			} catch (IOException e) {
-				System.out.println("Error handling client# " + clientNumber + ": " + e);
+				System.out.println("Erreur de gestion du client # " + clientNumber + ": " + e);
 			} finally {
 				try {
 					while (!userRequest.equals(Generals.ClientRequests.EXIT)) {
 						userRequest = in.readUTF();
 						if (userRequest.equals(Generals.ClientRequests.SOBEL)) {
 							imageName = in.readUTF();
-							System.out.println("Image name " + imageName);
 							BufferedImage image = receiveImage();
 							BufferedImage processedImage = doSobel(image);
 							out.writeUTF(imageName.split(Pattern.quote("."))[1]);
@@ -158,7 +156,7 @@ public class Server {
 					System.out.println(e);
 					e.printStackTrace(System.out);
 				}
-				System.out.println("Connection with client# " + clientNumber + " closed.");
+				System.out.println("La connexion avec le client #" + clientNumber + " est fermé.");
 			}
 		}
 
@@ -220,7 +218,7 @@ public class Server {
 				out.writeUTF(Generals.ServerResponses.OK);
 			}
 			
-			out.writeUTF("Hello from server - you are client# " + clientNumber);
+			out.writeUTF("Bonjour du serveur - vous êtes client #" + clientNumber);
 			clientPort = sock.getLocalPort();
 			adresseIP = sock.getInetAddress().toString();
 			username = name;
