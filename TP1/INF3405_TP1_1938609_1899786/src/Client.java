@@ -153,7 +153,7 @@ public class Client {
 					saveImage(processedImage, imageFormat);
 					break;
 				default:
-					System.out.println("Bruh just enter 1 or 2");
+					System.out.println("Entrez '1' ou '2'");
 					break;
 				}
 
@@ -195,24 +195,9 @@ public class Client {
 	private static BufferedImage receiveImage() throws IOException {
 		int count = in.readInt();
 		byte[] imageDataBuffer = new byte[count];
-//		int bytesReadCount = 0;
-//		do {
-//			bytesReadCount = in.read(imageDataBuffer);
-//			if (bytesReadCount < 0) {
-//				throw new IOException();
-//			}
-//			byteArrOutStr.write(imageDataBuffer, 0, bytesReadCount);
-//		} while (bytesReadCount == Generals.BUFFER_SIZE);
 		in.readFully(imageDataBuffer);
 		
 		BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageDataBuffer));
-		
-		return image;
-	}
-	
-	private static BufferedImage createImage(ByteArrayOutputStream byteArrOutStr) throws IOException {
-		byte[] data = byteArrOutStr.toByteArray();
-		BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
 		
 		return image;
 	}

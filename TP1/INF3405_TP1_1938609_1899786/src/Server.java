@@ -176,13 +176,6 @@ public class Server {
 			return image;
 		}
 		
-		private BufferedImage createImage(ByteArrayOutputStream byteArrOutStr) throws IOException {
-			byte[] data = byteArrOutStr.toByteArray();
-			BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
-			
-			return image;
-		}
-		
 		private BufferedImage doSobel(BufferedImage image) throws IOException {
 			return Sobel.process(image);
 		}
