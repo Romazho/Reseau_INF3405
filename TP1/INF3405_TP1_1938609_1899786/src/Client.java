@@ -133,31 +133,33 @@ public class Client {
 		if (!serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD) || !serverResponse.equals(Generals.ServerResponses.DISCONNECTING)) {
 			System.out.println(serverResponse);
 
-			while (!(Integer.parseInt(userRequest) == 1)) {
+			while (!userRequest.equals("1")) {
 				System.out.println("Que souhaitez-vous faire (entrer le chiffre associe aux options ci-dessous)?");
 				System.out.println("1 -> EXIT");
 				System.out.println("2 -> SOBEL");
 
 				userRequest = inputSc.nextLine();
-				
-				switch(Integer.parseInt(userRequest)) {
-				case 1:
-					out.writeUTF(Generals.ClientRequests.EXIT);
-					break;
-				case 2:
-					out.writeUTF(Generals.ClientRequests.SOBEL);
-					prepareImage();
-					String imageFormat = in.readUTF();
-					//System.out.println("Image format " + imageFormat);
-					BufferedImage processedImage = receiveImage();
-					saveImage(processedImage, imageFormat);
-					break;
-				default:
+				if(isNumeric(userRequest)) {
+					switch(Integer.parseInt(userRequest)) {
+					case 1:
+						out.writeUTF(Generals.ClientRequests.EXIT);
+						break;
+					case 2:
+						out.writeUTF(Generals.ClientRequests.SOBEL);
+						prepareImage();
+						String imageFormat = in.readUTF();
+						BufferedImage processedImage = receiveImage();
+						saveImage(processedImage, imageFormat);
+						break;
+					default:
+						System.out.println("Entrez '1' ou '2'");
+						break;
+					}
+				}
+				else {
 					System.out.println("Entrez '1' ou '2'");
-					break;
 				}
 
-				System.out.println(serverResponse);
 			}
 		}
 	}
@@ -217,4 +219,7 @@ public class Client {
 		System.out.println("Image reçue et sauvegardee sous /" + newImageName + "." + format);
 	}
 
+	private static boolean isNumeric(String s) {  
+	    return s != null && s.matches("[-+]?\\d*\\.?\\d+");  
+	}  
 }
