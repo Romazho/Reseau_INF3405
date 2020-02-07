@@ -168,9 +168,7 @@ public class Server {
 			in.readFully(imageDataBuffer);
 			
 			BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageDataBuffer));
-			
-			//BufferedImage image = createImage(byteArrOutStr);
-			
+						
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd@HH:mm:ss");
 			Date date = new Date();
 			System.out.println("[" + username + " - " + adresseIP.substring(1) + ":" + clientPort + " - " + dateFormat.format(date) + "]" + " : Image " + imageName + " recue pour traitement.");

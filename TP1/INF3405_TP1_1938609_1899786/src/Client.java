@@ -148,7 +148,7 @@ public class Client {
 					out.writeUTF(Generals.ClientRequests.SOBEL);
 					prepareImage();
 					String imageFormat = in.readUTF();
-					System.out.println("Image format " + imageFormat);
+					//System.out.println("Image format " + imageFormat);
 					BufferedImage processedImage = receiveImage();
 					saveImage(processedImage, imageFormat);
 					break;
@@ -188,10 +188,11 @@ public class Client {
 		out.writeInt(byteArrOutStr.size());
 		out.write(byteArrOutStr.toByteArray());
 		out.flush();
+		
+		System.out.println("l’image a été envoyée pour le traitement");
 	}
 
 	private static BufferedImage receiveImage() throws IOException {
-		ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
 		int count = in.readInt();
 		byte[] imageDataBuffer = new byte[count];
 //		int bytesReadCount = 0;
@@ -228,7 +229,7 @@ public class Client {
 			System.out.println(e.getMessage());
 		}
 		
-		System.out.println("Image sauvegardee sous /" + newImageName + "." + format);
+		System.out.println("Image reçue et sauvegardee sous /" + newImageName + "." + format);
 	}
 
 }
