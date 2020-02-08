@@ -64,7 +64,7 @@ public class Client {
 			serverAddress = inputSc.nextLine();
 		}
 
-		System.out.println("Sélectionnez votre port:");
+		System.out.println("Saisissez votre port:");
 		port = inputSc.nextInt();
 
 		// Check if the port is valid
@@ -93,7 +93,7 @@ public class Client {
 
 		if (serverResponse.equals(Generals.ServerResponses.NEW_USER)) {
 			System.out
-					.println(username + " n'existe pas dans la base de donnees. Creation de l'utilisateur " + username);
+					.println(username + " n'existe pas dans la base de données. Création de l'utilisateur " + username);
 		}
 
 		System.out.println("Veuillez entrer votre mot de passe:");
@@ -103,15 +103,19 @@ public class Client {
 		serverResponse = in.readUTF();
 
 		if (serverResponse.equals(Generals.ServerResponses.NEW_USER)) {
-			System.out.println("Mot de passe ajoute");
+			System.out.println("Mot de passe ajouté");
 		} else if (serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
 			while(serverResponse.equals(Generals.ServerResponses.WRONG_PASSWORD)) {
-				System.out.println("Mot de passe incorrect. Essayez d'entrer un autre mot de passe ou sortez (exit).");
+				System.out.println("Erreur dans la saisie du mot de passe. Essayez d'entrer un autre mot de passe ou sortez (sortir).");
 				password = inputSc.nextLine();
-				out.writeUTF(password);
+				if(password.equals("sortir")) {
+					out.writeUTF(Generals.ClientRequests.EXIT);
+				} else {
+					out.writeUTF(password);	
+				}
 				serverResponse = in.readUTF();
 				if(serverResponse.equals(Generals.ServerResponses.OK)) {
-					System.out.println("Connexion reussie");
+					System.out.println("Connexion réussie");
 					return;
 				} else if(serverResponse.equals(Generals.ServerResponses.DISCONNECTING)) {
 					sock.close();
@@ -123,7 +127,7 @@ public class Client {
 			sock.close();
 			inputSc.close();
 		} else if (serverResponse.equals(Generals.ServerResponses.OK)) {
-			System.out.println("Connexion reussie");
+			System.out.println("Connexion réussie");
 		}
 	}
 	
@@ -137,9 +141,9 @@ public class Client {
 			System.out.println(serverResponse);
 
 			while (!userRequest.equals("1")) {
-				System.out.println("Que souhaitez-vous faire (entrer le chiffre associe aux options ci-dessous)?");
-				System.out.println("1 -> EXIT");
-				System.out.println("2 -> SOBEL");
+				System.out.println("Que souhaitez-vous faire (entrer le chiffre associé aux options ci-dessous)?");
+				System.out.println("1 -> SORTIR");
+				System.out.println("2 -> APPLIQUER LE FILTRE DE SOBEL");
 
 				userRequest = inputSc.nextLine();
 				if(isNumeric(userRequest)) {
@@ -171,12 +175,12 @@ public class Client {
 	// It also notifies the server of the images name and file format.
 	private static void prepareImage() throws IOException {
 		// Query the image from the user
-		System.out.println("Quel est le nom de l'image (avec son extension de format) a sobeliser? (p.e. image1.jpg)");
+		System.out.println("Quel est le nom de l'image (avec son extension de format) a traiter? (p.e. image1.jpg)");
 		String imageName = inputSc.nextLine();
 		File imageFile = new File("./" + imageName);
 
 		while (!imageFile.canRead()) {
-			System.out.println("Impossible de lire le fichier ./" + imageName + ". Veuillez reessayer. L'image doit se trouver dans le repertoire courant.");
+			System.out.println("Impossible de lire le fichier ./" + imageName + ". Veuillez reessayer. L'image doit se trouver dans le répertoire courant.");
 			imageName = inputSc.nextLine();
 			imageFile = new File("./" + imageName);
 		}
@@ -216,7 +220,7 @@ public class Client {
 	
 	// saveImage is responsible for saving the provided image in the current directory
 	private static void saveImage(BufferedImage imageToSave, String format) {
-		System.out.println("Sous quel nom voulez-vous sauvegarder l'image sobelisee?");
+		System.out.println("Sous quel nom voulez-vous sauvegarder l'image traitée (il n'est pas nécessaire d'indiquer le format)?");
 		String newImageName = inputSc.nextLine();
 		
 		try {
@@ -227,7 +231,7 @@ public class Client {
 			System.out.println(e.getMessage());
 		}
 		
-		System.out.println("Image reçue et sauvegardee sous /" + newImageName + "." + format);
+		System.out.println("Image reçue et sauvegardée sous ./" + newImageName + "." + format);
 	}
 
 	//source : https://stackoverflow.com/questions/14206768/how-to-check-if-a-string-is-numeric

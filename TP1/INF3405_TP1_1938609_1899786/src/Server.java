@@ -38,7 +38,7 @@ public class Server {
 		int clientCounter = 0;
 		nameAndPasswordMap = new HashMap<String, String>();
 
-		System.out.println("Séléctionner votre adresse IP:");
+		System.out.println("Saisissez votre adresse IP:");
 
 		String serverAddress = "";
 		Scanner S = new Scanner(System.in);
@@ -46,12 +46,12 @@ public class Server {
 		
 		// check if the ip address is valid
 		while (!isValidInet4Address(serverAddress)) {
-			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
+			System.out.println("Vous avez sélectionnée une mauvaise adresse IP, veuillez réessayer:");
 			serverAddress = S.next();
 		}
 
 		int port = 0;
-		System.out.println("Séléctionner votre port:");
+		System.out.println("Saisissez votre port:");
 		port = S.nextInt();
 
 		// Check if the port is valid
@@ -159,7 +159,7 @@ public class Server {
 					System.out.println(e);
 					e.printStackTrace(System.out);
 				}
-				System.out.println("La connexion avec le client #" + clientNumber + " est fermé.");
+				System.out.println("La connexion avec le client #" + clientNumber + " est fermée.");
 			}
 		}
 		
@@ -234,7 +234,7 @@ public class Server {
 				out.writeUTF(Generals.ServerResponses.OK);
 			}
 			
-			out.writeUTF("Bonjour du serveur - vous êtes client #" + clientNumber);
+			out.writeUTF("Bonjour du serveur - vous êtes le client #" + clientNumber);
 			clientPort = sock.getLocalPort();
 			adresseIP = sock.getInetAddress().toString();
 			username = name;
@@ -274,7 +274,7 @@ public class Server {
 		// validateUser is responsible for checking if the username and password that are provided match the records in the database
 		public boolean validateUser(String name, String password) throws IOException {
 			if ((nameAndPasswordMap.get(name) != null) && (nameAndPasswordMap.get(name).equals(password))) {
-				System.out.println("Utilisateur " + name + " connecte");
+				System.out.println("Utilisateur " + name + " connecté");
 				return true;
 			} else {
 				System.out.println("Mot de passe incorrect pour " + name);
