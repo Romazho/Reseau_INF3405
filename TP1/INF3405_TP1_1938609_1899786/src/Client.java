@@ -54,11 +54,11 @@ public class Client {
 	}
 
 	private static void createSocket() throws UnknownHostException, IOException {
-		System.out.println("Sélectionnez votre adresse IP:");
+		System.out.println("Saisissez votre adresse IP:");
 		serverAddress = inputSc.nextLine();
 
 		while (!isValidInet4Address(serverAddress)) {
-			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
+			System.out.println("Vous avez saisi une mauvaise adresse IP, veuillez réessayer:");
 			serverAddress = inputSc.nextLine();
 		}
 
@@ -163,7 +163,7 @@ public class Client {
 	}
 	
 	private static void prepareImage() throws IOException {
-		System.out.println("Quel est le nom de l'image (son extension de format) a sobeliser? (p.e. image1.jpg)");
+		System.out.println("Quel est le nom de l'image (avec son extension de format) a sobeliser? (p.e. image1.jpg)");
 		String imageName = inputSc.nextLine();
 		File imageFile = new File("./" + imageName);
 
@@ -189,7 +189,7 @@ public class Client {
 		out.write(byteArrOutStr.toByteArray());
 		out.flush();
 		
-		System.out.println("l’image a été envoyée pour le traitement");
+		System.out.println("L’image a été envoyée pour le traitement");
 	}
 
 	private static BufferedImage receiveImage() throws IOException {
