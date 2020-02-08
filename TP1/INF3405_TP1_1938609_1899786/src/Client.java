@@ -42,7 +42,8 @@ public class Client {
 			inputSc.close();
 		}
 	}
-
+	
+	// isValidInet4Address is responsible for validating if the provided ip address is a valid ipv4 address
 	public static boolean isValidInet4Address(String ip) {
 		if (ip == null) {
 			return false;
@@ -56,7 +57,8 @@ public class Client {
 	private static void createSocket() throws UnknownHostException, IOException {
 		System.out.println("Saisissez votre adresse IP:");
 		serverAddress = inputSc.nextLine();
-
+		
+		// check if the ip address is valid
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez saisi une mauvaise adresse IP, veuillez réessayer:");
 			serverAddress = inputSc.nextLine();
@@ -65,7 +67,7 @@ public class Client {
 		System.out.println("Sélectionnez votre port:");
 		port = inputSc.nextInt();
 
-		// vérification de la cohérence du port
+		// Check if the port is valid
 		while (port < 5000 || port > 5050) {
 			System.out.println("Veuillez entrer un port entre 5000 et 5050:");
 			port = inputSc.nextInt();
@@ -78,6 +80,8 @@ public class Client {
 		out = new DataOutputStream(sock.getOutputStream());
 	}
 
+	// askUserCredentials is responsible for getting the username and password from the user.
+	// It then sends both of these informations to the server and handles the cases where the password is incorrect.
 	private static void askUserCredentials() throws IOException {
 		serverResponse = "";
 
@@ -122,7 +126,8 @@ public class Client {
 			System.out.println("Connexion reussie");
 		}
 	}
-
+	
+	// processUserRequests is responsible for handling the user requests and sending them to the server and then listenening to the server's responses
 	private static void processUserRequests() throws IOException {
 		String userRequest = "0";
 
@@ -162,7 +167,10 @@ public class Client {
 		}
 	}
 	
+	// prepareImage is responsible for getting the image from the current directory and then passing it to sendImage.
+	// It also notifies the server of the images name and file format.
 	private static void prepareImage() throws IOException {
+		// Query the image from the user
 		System.out.println("Quel est le nom de l'image (avec son extension de format) a sobeliser? (p.e. image1.jpg)");
 		String imageName = inputSc.nextLine();
 		File imageFile = new File("./" + imageName);
@@ -178,21 +186,25 @@ public class Client {
 		sendImage(imageFile, imageName);
 	}
 	
-	//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+	// https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+	// sendImage is responsible for sending an image file and its size to the server
 	private static void sendImage(File imageFile, String imageName) throws IOException {
+		// Rewrite the image file into a ByteArrayOutputStream to be sent to the server
 		BufferedImage image = ImageIO.read(imageFile);
 		ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
 		ImageIO.write(image, imageName.split(Pattern.quote("."))[1], byteArrOutStr);
 		
-		// Send the actual image
+		// Send the size of the image and the actual image in the ByteArrayOutputStream
 		out.writeInt(byteArrOutStr.size());
 		out.write(byteArrOutStr.toByteArray());
 		out.flush();
 		
 		System.out.println("L’image a été envoyée pour le traitement");
 	}
-
+	
+	// receiveImage is responsible for receiving and returning the image sent from the server
 	private static BufferedImage receiveImage() throws IOException {
+		// read the size of the image and then read the image into a buffer
 		int count = in.readInt();
 		byte[] imageDataBuffer = new byte[count];
 		in.readFully(imageDataBuffer);
@@ -202,6 +214,7 @@ public class Client {
 		return image;
 	}
 	
+	// saveImage is responsible for saving the provided image in the current directory
 	private static void saveImage(BufferedImage imageToSave, String format) {
 		System.out.println("Sous quel nom voulez-vous sauvegarder l'image sobelisee?");
 		String newImageName = inputSc.nextLine();

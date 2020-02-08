@@ -43,7 +43,8 @@ public class Server {
 		String serverAddress = "";
 		Scanner S = new Scanner(System.in);
 		serverAddress = S.next();
-
+		
+		// check if the ip address is valid
 		while (!isValidInet4Address(serverAddress)) {
 			System.out.println("Vous avez sélectionné une mauvaise adresse IP, veuillez réessayer:");
 			serverAddress = S.next();
@@ -53,7 +54,7 @@ public class Server {
 		System.out.println("Séléctionner votre port:");
 		port = S.nextInt();
 
-		// vérification de la cohérence du port
+		// Check if the port is valid
 		while (port < 5000 || port > 5050) {
 			System.out.println("Veuillez entrer un port entre 5000 et 5050:");
 			port = S.nextInt();
@@ -75,7 +76,8 @@ public class Server {
 			listener.close();
 		}
 	}
-
+	
+	// isValidInet4Address is responsible for validating if the provided ip address is a valid ipv4 address
 	public static boolean isValidInet4Address(String ip) {
 		if (ip == null) {
 			return false;
@@ -85,7 +87,8 @@ public class Server {
 
 		return matcher.matches();
 	}
-
+	
+	// readUsers is responsible for initializing the map containing the usernames as keys and the passwords from the database as values
 	private static void readUsers() {
 		try {
 			nameAndPasswordMap.clear();
@@ -130,7 +133,8 @@ public class Server {
 			}
 			System.out.println("Nouvelle connexion avec le client #" + clientNumber + " à " + socket);
 		}
-
+		
+		// the client requests are handled inside the run method
 		public void run() {
 			userRequest = "";
 			try {
@@ -158,8 +162,10 @@ public class Server {
 				System.out.println("La connexion avec le client #" + clientNumber + " est fermé.");
 			}
 		}
-
+		
+		// receiveImage is responsible for receiving and returning the image sent from the client 
 		private BufferedImage receiveImage() throws IOException {
+			// read the size of the image and then read the image into a buffer
 			int count = in.readInt();
 			byte[] imageDataBuffer = new byte[count];
 			in.readFully(imageDataBuffer);
@@ -173,23 +179,32 @@ public class Server {
 			return image;
 		}
 		
+		// doSobel is responsible for applying the Sobel filter on an image and then returning the processed image
 		private BufferedImage doSobel(BufferedImage image) throws IOException {
 			return Sobel.process(image);
 		}
 		
-		//https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+		// https://stackoverflow.com/questions/25086868/how-to-send-images-through-sockets-in-java?fbclid=IwAR3naVtKkSJQLKs115olSiQ9tCk_z4gbm-bZZZOsnvQqRikFUWK8BKrv-Zo
+		// sendImage is responsible for sending an image file and its size to the client
 		private void sendImage(BufferedImage image, String format) throws IOException {
+			// Rewrite the image file into a ByteArrayOutputStream to be sent to the server
 			ByteArrayOutputStream byteArrOutStr = new ByteArrayOutputStream();
 			ImageIO.write(image, format, byteArrOutStr);
 			
-			// Send the actual image
+			// Send the size of the image and the actual image in the ByteArrayOutputStream
 			out.writeInt(byteArrOutStr.size());
 			out.write(byteArrOutStr.toByteArray());
 			out.flush();
 		}
 		
+		// setupUser is responsible for:
+		// 1. Registering the user if the username provided is not in the database.
+		// 2. Validating the password provided for a given username.
+		// 3. Handling cases where the password is incorrect.
 		private void setupUser() throws IOException {
 			String name = in.readUTF();
+			
+			// Check if username is in the database
 			boolean isExistantUser = isUsernameRegistered(name);
 			if (!isExistantUser) {
 				registerUsername(name);
@@ -199,6 +214,8 @@ public class Server {
 			}
 			
 			String password = in.readUTF();
+			// If the username was not registered, add the username.
+			// Otherwise, check if the password is the correct one for the povided username
 			if (!isExistantUser) {
 				registerPassword(password);
 				out.writeUTF(Generals.ServerResponses.NEW_USER);
@@ -222,12 +239,14 @@ public class Server {
 			adresseIP = sock.getInetAddress().toString();
 			username = name;
 		}
-
+		
+		// isUsernameRegistered is responsible for checking if the username is present in the database
 		private boolean isUsernameRegistered(String username) {
 			readUsers();
 			return nameAndPasswordMap.get(username) != null;
 		}
-
+		
+		// registerUsername is responsible for registering a username in the database
 		private void registerUsername(String username) throws IOException {
 			File fileDesc = new File("./users.txt");
 			FileWriter writer = new FileWriter("./users.txt", true);
@@ -240,7 +259,8 @@ public class Server {
 			printer.close();
 			writer.close();
 		}
-
+		
+		// registerPassword is responsible for registering a password in the database
 		private void registerPassword(String password) throws IOException {
 			FileWriter writer = new FileWriter("./users.txt", true);
 			PrintWriter printer = new PrintWriter(writer);
@@ -250,7 +270,8 @@ public class Server {
 			printer.close();
 			writer.close();
 		}
-
+		
+		// validateUser is responsible for checking if the username and password that are provided match the records in the database
 		public boolean validateUser(String name, String password) throws IOException {
 			if ((nameAndPasswordMap.get(name) != null) && (nameAndPasswordMap.get(name).equals(password))) {
 				System.out.println("Utilisateur " + name + " connecte");
