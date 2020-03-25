@@ -159,12 +159,12 @@ public class Client {
 						saveImage(processedImage, imageFormat);
 						break;
 					default:
-						System.out.println("Entrez '1' ou '2'");
+						System.out.println(userRequest + " n'existe pas comme option. Entrez '1' ou '2'");
 						break;
 					}
 				}
 				else {
-					System.out.println("Entrez '1' ou '2'");
+					System.out.println(userRequest + " n'existe pas comme option. Entrez '1' ou '2'");
 				}
 
 			}
@@ -235,6 +235,7 @@ public class Client {
 	}
 
 	//source : https://stackoverflow.com/questions/14206768/how-to-check-if-a-string-is-numeric
+	// isNumeric is responsible for checking if the given string is a number
 	private static boolean isNumeric(String s) {  
 	    return s != null && s.matches("[-+]?\\d*\\.?\\d+");  
 	}  
